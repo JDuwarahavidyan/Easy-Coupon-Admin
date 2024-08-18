@@ -13,6 +13,7 @@ class User {
     studentCount = 30,
     canteenCount = 0,
     profilePic = null
+    
   }) {
       this.id = id;
       this.email = email;
@@ -27,3 +28,5 @@ class User {
       this.profilePic = profilePic;
   }
 }
+
+module.exports = User;
