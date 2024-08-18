@@ -1,26 +1,16 @@
-import Chart from '../../components/chart/Chart'
-import FeaturedInfo from '../../components/featuredInfo/FeaturedInfo'
-import './home.css'
+import Chart from '../../components/chart/Chart';
+import './home.css';
 import WidgetSm from '../../components/widgetSm/WidgetSm';
 import WidgetLg from '../../components/widgetLg/WidgetLg';
 import axios from 'axios';
 import { useEffect, useMemo, useState } from 'react';
+import FeaturedInfo from '../../components/featuredInfo/FeaturedInfo';
 
 export default function Home() {
   const MONTHS = useMemo(
     () => [
-      "Jan",
-      "Feb",
-      "Mar",
-      "Apr",
-      "May",
-      "Jun",
-      "Jul",
-      "Aug",
-      "Sep",
-      "Oct",
-      "Nov",
-      "Dec",
+      "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+      "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
     ],
     []
   );
@@ -30,32 +20,41 @@ export default function Home() {
   useEffect(() => {
     const getStats = async () => {
       try {
+        const user = JSON.parse(localStorage.getItem("user"));
+        if (!user || !user.customToken) {
+          console.error("User is not authenticated or customToken is missing.");
+          return;
+        }
+  
         const res = await axios.get("/users/stats", {
           headers: {
-            authorization:
-              "Bearer " + JSON.parse(localStorage.getItem("user")).accessToken,
+            authorization: "Bearer " + user.customToken,
           },
         });
-        const statsList = res.data.sort(function (a, b) {
-          return a._id - b._id;
-        });
-
-        const tempStats = [];
-        statsList.forEach((item) => {
-          tempStats.push({ name: MONTHS[item._id - 1], "New User": item.total });
-        });
-
-        setUserStats(tempStats);
+  
+        if (res.data && Array.isArray(res.data)) {
+          const statsList = res.data.sort((a, b) => a.month - b.month);
+  
+          const tempStats = MONTHS.map((month, index) => {
+            const found = statsList.find(item => item.month === index + 1);
+            return { name: month, "New User": found ? found.total : 0 };
+          });
+  
+          setUserStats(tempStats);
+        } else {
+          console.error("Unexpected response format:", res.data);
+        }
       } catch (err) {
-        console.log(err);
+        console.error("Failed to fetch user stats:", err);
       }
     };
     getStats();
   }, [MONTHS]);
+  
 
   return (
     <div className="home">
-      {/* <FeaturedInfo /> */}
+      <FeaturedInfo />
       <Chart data={userStats} title="User Analytics" grid dataKey="New User" />
       <div className="homeWidgets">
         <WidgetSm />

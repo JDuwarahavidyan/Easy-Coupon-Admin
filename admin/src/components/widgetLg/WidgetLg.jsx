@@ -25,7 +25,7 @@ export default function WidgetLg() {
       try {
         const res = await axios.get("/users?new=true", {
           headers: {
-            authorization: "Bearer " + JSON.parse(localStorage.getItem("user")).accessToken,
+            authorization: "Bearer " + JSON.parse(localStorage.getItem("user")).customToken,
           },
         });
         setUsers(res.data);
@@ -47,24 +47,25 @@ export default function WidgetLg() {
         <Table className="widgetLgTable" sx={{ minWidth: 800 }} aria-label="simple table">
           <TableHead>
             <TableRow className="widgetLgTr">
-              <TableCell className="widgetLgTh">Customer</TableCell>
+              <TableCell className="widgetLgTh">User</TableCell>
+              <TableCell className="widgetLgTh">Email</TableCell>
               <TableCell className="widgetLgTh">Created At</TableCell>
               <TableCell className="widgetLgTh">Updated At</TableCell>
-              <TableCell className="widgetLgTh">Status</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
-            {users.slice(0, 5).map((user) => (
+            {users.slice(0, 4).map((user) => (
               <TableRow className="widgetLgTr" key={user._id}>
                 <TableCell className="widgetLgUser" component="th" scope="row">
                   <Stack direction="row" spacing={2}>
-                    <Avatar className="widgetLgImg" alt={user.username} src={user.profilePic || "https://www.pngkey.com/png/full/114-1149878_setting-user-avatar-in-specific-size-without-breaking.png"} />
+                    <Avatar className="widgetLgImg" alt={user.userName} src={user.profilePic || "https://www.pngkey.com/png/full/114-1149878_setting-user-avatar-in-specific-size-without-breaking.png"} />
                   </Stack>
-                  <span className="widgetLgName">{user.username}</span>
+                  <span className="widgetLgName">{user.userName}</span>
                 </TableCell>
+                <TableCell className="widgetLgStatus"><Button props={user.email} /></TableCell>
                 <TableCell className="widgetLgDate">{new Date(user.createdAt).toLocaleDateString()}</TableCell>
                 <TableCell className="widgetLgDate">{new Date(user.updatedAt).toLocaleDateString()}</TableCell>
-                <TableCell className="widgetLgStatus"><Button props={user.status} /></TableCell>
+          
               </TableRow>
             ))}
           </TableBody>
