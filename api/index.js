@@ -5,44 +5,24 @@ const authRoute = require('./routes/auth');
 const userRoute = require('./routes/users');
 const movieRoute = require('./routes/movies');
 const listRoute = require('./routes/lists');
-const admin = require('firebase-admin');
+const admin = require('firebase-admin'); // Importing admin
 
-// Load environment variables
 dotenv.config();
 
-// Initialize Firebase Admin SDK
 admin.initializeApp({
   credential: admin.credential.applicationDefault(),
   databaseURL: process.env.FIREBASE_DATABASE_URL
 });
 
-const db = admin.firestore();
+const db = admin.firestore(); // Initializing Firestore
 
-// Middleware to use Firestore
 app.use((req, res, next) => {
-  req.db = db;
+  req.db = db; // Making Firestore available in req
   next();
 });
 
-app.use(express.json()); // to accept JSON files
+app.use(express.json());
 
-
-app.post('/register', async (req, res) => {
-  const { email, password } = req.body;
-  try {
-    const userRecord = await admin.auth().createUser({
-      email,
-      password,
-    });
-    res.status(201).send(userRecord);
-  } catch (error) {
-    res.status(500).send(error.message);
-  }
-});
-
-
-
-// Routes
 app.use('/api/auth', authRoute);
 app.use('/api/users', userRoute);
 app.use('/api/movies', movieRoute);
