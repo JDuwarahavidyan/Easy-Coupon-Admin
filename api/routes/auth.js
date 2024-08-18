@@ -93,7 +93,6 @@ router.post('/login', async (req, res) => {
         const customToken = await admin.auth().createCustomToken(userId);
 
         res.status(200).json({
-            message: 'Login successful',
             customToken,
             uid: userId,
         });

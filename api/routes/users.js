@@ -71,29 +71,31 @@ router.get("/", verifyAdmin, async (req, res) => {
 // GET USER STATS - MONTHLY USERS REGISTERED
 router.get("/stats", verifyAdmin, async (req, res) => {
   try {
-      const today = new Date();
-      const lastYear = new Date(today.setFullYear(today.getFullYear() - 1));
+    const lastYear = new Date();
+    lastYear.setFullYear(lastYear.getFullYear() - 1);
 
-      const snapshot = await admin.firestore().collection('users')
-          .where('createdAt', '>=', lastYear.toISOString())
-          .get();
+    const query = admin.firestore().collection('users')
+      .where('createdAt', '>=', lastYear.toISOString());
 
-      const monthlyStats = {};
+    const snapshot = await query.get();
 
-      snapshot.forEach(doc => {
-          const month = new Date(doc.data().createdAt).getMonth() + 1;
-          monthlyStats[month] = (monthlyStats[month] || 0) + 1;
-      });
+    const monthlyStats = {};
 
-      const stats = Object.keys(monthlyStats).map(month => ({
-          month,
-          total: monthlyStats[month],
-      }));
+    snapshot.forEach(doc => {
+      const month = new Date(doc.data().createdAt).getMonth() + 1;
+      monthlyStats[month] = (monthlyStats[month] || 0) + 1;
+    });
 
-      res.status(200).json(stats);
+    const stats = Object.keys(monthlyStats).map(month => ({
+      month: parseInt(month, 10),
+      total: monthlyStats[month],
+    }));
+
+    res.status(200).json(stats);
   } catch (err) {
-      res.status(500).json({ error: err.message });
+    res.status(500).json({ error: err.message });
   }
-})
+});
 
+  
 module.exports = router;
