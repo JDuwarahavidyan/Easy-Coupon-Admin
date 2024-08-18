@@ -2,7 +2,6 @@ const router = require('express').Router();
 const admin = require('firebase-admin');
 const User = require('../models/User');
 
-
 // Register a new user
 router.post('/register', async (req, res) => {
     const { email, password, userName, fullName, role } = req.body;
@@ -71,7 +70,6 @@ router.post('/login', async (req, res) => {
     const db = req.db;
 
     try {
-       
         const userDoc = await db.collection('users')
             .where('userName', '==', userName)
             .limit(1)
@@ -81,32 +79,28 @@ router.post('/login', async (req, res) => {
             return res.status(404).json({ error: 'User not found' });
         }
 
-   
         const userData = userDoc.docs[0].data();
 
-      
         if (userData.role !== 'admin') {
             return res.status(403).json({ error: 'Access denied' });
         }
 
         const email = userData.email;
 
-    
         const user = await admin.auth().getUserByEmail(email);
         const userId = user.uid;
 
-      
-        const token = await admin.auth().createCustomToken(userId);
+        const customToken = await admin.auth().createCustomToken(userId);
 
-     
         res.status(200).json({
             message: 'Login successful',
-            token,
+            customToken,
             uid: userId,
         });
     } catch (error) {
         res.status(400).json({ error: error.message });
     }
 });
+
 
 module.exports = router;
