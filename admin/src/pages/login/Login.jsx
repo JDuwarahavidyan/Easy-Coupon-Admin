@@ -28,13 +28,13 @@ export default function Login() {
         <div className="login">
             <div className="top">
                 <div className="wrapper">
-                    <span className="logo">Cinexa Admin</span>
+                    <span className="logo">Easy Coupon</span>
                 </div>
             </div>
 
             <div className="container">
                 <form>
-                    <h1>Welcome to Cinexa</h1>
+                    <h1>Welcome to Easy Coupon</h1>
                     {error && <div className="error-alert">{error}</div>}
                     <TextField 
                         className="inputText" 

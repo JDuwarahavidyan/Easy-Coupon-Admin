@@ -22,7 +22,7 @@ export const getUsers = async (dispatch) => {
   try {
     const res = await axios.get("/users", {
       headers: {
-        authorization: "Bearer " + JSON.parse(localStorage.getItem("user")).accessToken,
+        authorization: "Bearer " + JSON.parse(localStorage.getItem("user")).customToken,
       },
     });
     dispatch(getUsersSuccess(res.data));
@@ -36,7 +36,7 @@ export const createUser = async (User, dispatch) => {
     try {
         const res = await axios.post("/users", User, {
         headers: {
-          authorization: "Bearer " + JSON.parse(localStorage.getItem("user")).accessToken,
+          authorization: "Bearer " + JSON.parse(localStorage.getItem("user")).customToken,
         },
       });
       dispatch(createUserSuccess(res.data));
@@ -51,7 +51,7 @@ export const updateUser = async (id, User, dispatch) => {
     try {
         const res = await axios.put("/users/" + id, User, {
         headers: {
-          authorization: "Bearer " + JSON.parse(localStorage.getItem("user")).accessToken,
+          authorization: "Bearer " + JSON.parse(localStorage.getItem("user")).customToken,
         },
       });
       dispatch(updateUserSuccess(res.data));
@@ -67,7 +67,7 @@ export const deleteUser = async (id, dispatch) => {
     try {
         await axios.delete("/users/" + id, {
         headers: {
-          authorization: "Bearer " + JSON.parse(localStorage.getItem("user")).accessToken,
+          authorization: "Bearer " + JSON.parse(localStorage.getItem("user")).customToken,
         },
       });
       dispatch(deleteUserSuccess(id));
