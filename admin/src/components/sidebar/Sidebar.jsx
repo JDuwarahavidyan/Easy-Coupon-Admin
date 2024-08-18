@@ -48,12 +48,7 @@ export default function Sidebar() {
                 Movies
               </li>
             </Link>
-            <Link to="/lists" className='link'>
-              <li className="sidebarListItem">
-                <ListIcon className="sidebarIcon" />
-                Lists
-              </li>
-            </Link>
+            
            
           </ul>
         </div>

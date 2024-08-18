@@ -7,3 +7,6 @@
     margin: 20px;
 }
 
+.chart {
+  height: 400px; /* Set a specific height */
+}
