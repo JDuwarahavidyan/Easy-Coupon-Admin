@@ -1,66 +1,112 @@
 const router = require('express').Router();
+const admin = require('firebase-admin');
 const User = require('../models/User');
-const CryptoJS = require("crypto-js"); //to hash the password
-const jwt = require("jsonwebtoken"); //to create a token
 
 
-// REGISTER
-
-router.post("/register",async (req, res)=>{
-    const newUser = new User({
-        username:req.body.username,
-        email:req.body.email,
-        // password:req.body.password,
-        password: CryptoJS.AES.encrypt(
-            req.body.password, 
-            process.env.SECRET_KEY
-        ).toString()  //encrypt
-    });
+// Register a new user
+router.post('/register', async (req, res) => {
+    const { email, password, userName, fullName, role } = req.body;
+    const db = req.db;
 
     try {
-        const user = await newUser.save();
-        res.status(201).json(user);
-      } catch (err) {
-        res.status(500).json(err);
-      }
-})
 
-// LOGIN
+        const existingUser = await db.collection('users')
+            .where('userName', '==', userName)
+            .limit(1)
+            .get();
 
-router.post("/login", async (req,res)=> {
-    try{
-        const user = await User.findOne({ email: req.body.email });
-        if (!user) {
-            return res.status(401).json({ message: "Wrong password or username" });
-            
-        }
-        const bytes  = CryptoJS.AES.decrypt(user.password, process.env.SECRET_KEY); //decrypt
-        const originalPassword = bytes.toString(CryptoJS.enc.Utf8);
-
-        if(originalPassword !== req.body.password){
-           return res.status(401).json({ message: "Wrong password or username" });
+        if (!existingUser.empty) {
+            return res.status(400).json({ error: 'Username is already taken' });
         }
 
-        const accessToken = jwt.sign(
-            { id: user._id, isAdmin: user.isAdmin }, // hide the id and isAdmin
-            process.env.SECRET_KEY,
-            { expiresIn: "5d" } // token expires in 5 days
-        );
 
-        const { password, ...info } = user._doc; //remove password from the response
+        const userRecord = await admin.auth().createUser({
+            email,
+            password,
+        });
 
-        res.status(200).json({...info, accessToken});
 
-    }catch(err){
-        res.status(500).json(err);
+        const newUser = new User({
+            id: userRecord.uid,
+            email,
+            userName,
+            fullName,
+            role,
+            isFirstTime: true, 
+            createdAt: admin.firestore.FieldValue.serverTimestamp(),
+            updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+            studentCount: 30, 
+            canteenCount: 0,  
+            profilePic: null  
+        });
+
+
+        await db.collection('users').doc(userRecord.uid).set({
+            id: newUser.id,
+            email: newUser.email,
+            userName: newUser.userName,
+            fullName: newUser.fullName,
+            isFirstTime: newUser.isFirstTime,
+            createdAt: newUser.createdAt,
+            updatedAt: newUser.updatedAt,
+            role: newUser.role,
+            studentCount: newUser.studentCount,
+            canteenCount: newUser.canteenCount,
+            profilePic: newUser.profilePic,
+        });
+
+
+        res.status(201).json({
+            message: 'User registered successfully',
+            uid: userRecord.uid,
+        });
+    } catch (error) {
+        res.status(400).json({ error: error.message });
     }
-})
+});
+
+// Login route
+router.post('/login', async (req, res) => {
+    const { userName, password } = req.body;
+    const db = req.db;
+
+    try {
+       
+        const userDoc = await db.collection('users')
+            .where('userName', '==', userName)
+            .limit(1)
+            .get();
+
+        if (userDoc.empty) {
+            return res.status(404).json({ error: 'User not found' });
+        }
+
+   
+        const userData = userDoc.docs[0].data();
+
+      
+        if (userData.role !== 'admin') {
+            return res.status(403).json({ error: 'Access denied' });
+        }
+
+        const email = userData.email;
+
+    
+        const user = await admin.auth().getUserByEmail(email);
+        const userId = user.uid;
+
+      
+        const token = await admin.auth().createCustomToken(userId);
+
+     
+        res.status(200).json({
+            message: 'Login successful',
+            token,
+            uid: userId,
+        });
+    } catch (error) {
+        res.status(400).json({ error: error.message });
+    }
+});
 
 module.exports = router;
-
-// Now we create JWT token to authenticate the user since if someone knows the userID
-// they can access the data.
-//To prevent this we create a token that is sent to the user when they login
-// and they have to send this token to access the data.
-
-// if we sent accessToken to the user, they can access the data but never create same token again
