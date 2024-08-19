@@ -1,7 +1,8 @@
 import "./login.scss";
 import Button from '@mui/material/Button';
 import TextField from '@mui/material/TextField';
-import { useState, useContext, useEffect } from "react";
+import CircularProgress from '@mui/material/CircularProgress';
+import { useState, useContext } from "react";
 import { AuthContext } from "../../context/authContext/AuthContext";
 import { login } from "../../context/authContext/apiCalls";
 
@@ -12,17 +13,20 @@ export default function Login() {
     const { isFetching, dispatch } = useContext(AuthContext);
 
     const handleLogin = async (e) => {
-        e.preventDefault(); // prevent the page from refreshing
+        e.preventDefault();
+
+        // Basic validation for empty fields
+        if (!username || !password) {
+            setError("All fields are required");
+            return;
+        }
+
+        // Attempt login and set error message if login fails
         const errorMsg = await login({ userName: username, password }, dispatch);
         if (errorMsg) {
-            setError(errorMsg); // Set error message if any
-            alert(errorMsg);
+            setError(errorMsg);
         }
     };
-
-    useEffect(() => {  
-        localStorage.setItem("user", JSON.stringify({ username, password }));
-    }, [username, password]);
 
     return (
         <div className="login">
@@ -35,7 +39,6 @@ export default function Login() {
             <div className="container">
                 <form>
                     <h1>Welcome to Easy Coupon</h1>
-                    {error && <div className="error-alert">{error}</div>}
                     <TextField 
                         className="inputText" 
                         label="Username" 
@@ -54,12 +57,15 @@ export default function Login() {
                         InputProps={{ disableUnderline: true }}
                         onChange={(e) => { setPassword(e.target.value); setError(''); }}
                     />
+                    {error && <p className="errorMessage">{error}</p>}
                     <Button 
                         className="loginButton"  
                         variant="contained"
                         onClick={handleLogin}
                         disabled={isFetching}
-                    >Login</Button>
+                    >
+                        {isFetching ? <CircularProgress size={24} /> : "Login"}
+                    </Button>
                 </form>
             </div>
         </div>

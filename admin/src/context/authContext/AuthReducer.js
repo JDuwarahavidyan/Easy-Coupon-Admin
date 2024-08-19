@@ -25,7 +25,7 @@ const AuthReducer = (state, action) => {
         error: false,
       };
     default:
-      return state; // No need for {...state} if you aren't modifying state
+      return state; 
   }
 };
 

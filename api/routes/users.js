@@ -2,7 +2,8 @@ const router = require('express').Router();
 const User = require('../models/User');
 const verifyAdmin = require("../verifyToken");
 const admin = require('firebase-admin');
-// UPDATE
+const { sendEmail } = require('../mail');
+
 
 
 // UPDATE
@@ -75,14 +76,15 @@ router.get("/stats", verifyAdmin, async (req, res) => {
     lastYear.setFullYear(lastYear.getFullYear() - 1);
 
     const query = admin.firestore().collection('users')
-      .where('createdAt', '>=', lastYear.toISOString());
+      .where('createdAt', '>=', admin.firestore.Timestamp.fromDate(lastYear));
 
     const snapshot = await query.get();
 
     const monthlyStats = {};
 
     snapshot.forEach(doc => {
-      const month = new Date(doc.data().createdAt).getMonth() + 1;
+      const createdAt = doc.data().createdAt.toDate(); // Convert Firestore Timestamp to JS Date
+      const month = createdAt.getMonth() + 1; // Get month (1-12)
       monthlyStats[month] = (monthlyStats[month] || 0) + 1;
     });
 
@@ -96,6 +98,72 @@ router.get("/stats", verifyAdmin, async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
+
+router.put("/disable/:id", verifyAdmin, async (req, res) => {
+  try {
+    const uid = req.params.id;
+
+    // Disable the user account in Firebase Authentication
+    await admin.auth().updateUser(uid, {
+      disabled: true
+    });
+
+    // Update the Firestore document to reflect the disabled status
+    await admin.firestore().collection('users').doc(uid).update({
+      disabled: true
+    });
+
+    // Fetch user details from Firestore
+    const userDoc = await admin.firestore().collection('users').doc(uid).get();
+    const userEmail = userDoc.data().email;
+    const userName = userDoc.data().username; // Assuming `username` field exists
+
+    // Send notification email
+    await sendEmail(
+      userEmail,
+      'Account Disabled',
+      `Your account has been disabled. Please contact the Administrator for more information.`
+    );
+
+    res.status(200).json({ message: "User account has been disabled" });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ENABLE USER ACCOUNT
+router.put("/enable/:id", verifyAdmin, async (req, res) => {
+  try {
+    const uid = req.params.id;
+
+    // Enable the user account in Firebase Authentication
+    await admin.auth().updateUser(uid, {
+      disabled: false
+    });
+
+    // Update the Firestore document to reflect the enabled status
+    await admin.firestore().collection('users').doc(uid).update({
+      disabled: false
+    });
+
+    // Fetch user details from Firestore
+    const userDoc = await admin.firestore().collection('users').doc(uid).get();
+    const userEmail = userDoc.data().email;
+    const userName = userDoc.data().username; // Assuming `username` field exists
+
+    // Send notification email
+    await sendEmail(
+      userEmail,
+      'Account Enabled',
+      `Your account has been enabled. If you did not request this, please contact support.`
+    );
+
+    res.status(200).json({ message: "User account has been enabled" });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 
   
 module.exports = router;

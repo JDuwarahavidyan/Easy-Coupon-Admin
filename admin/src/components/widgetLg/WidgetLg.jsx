@@ -8,6 +8,7 @@ import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import Paper from '@mui/material/Paper';
+import CircularProgress from '@mui/material/CircularProgress'; // Import CircularProgress
 import axios from 'axios';
 import { useState, useEffect } from 'react';
 
@@ -39,7 +40,20 @@ export default function WidgetLg() {
     fetchUsers();
   }, []);
 
-  
+  if (loading) {
+    return (
+      <div className="widgetLg">
+        <div className="loadingContainer">
+          <CircularProgress />
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return <div className="widgetLg">Error loading data</div>;
+  }
+
   return (
     <div className="widgetLg">
       <h3 className="widgetLgTitle">Other Details</h3>
@@ -65,7 +79,6 @@ export default function WidgetLg() {
                 <TableCell className="widgetLgStatus"><Button props={user.email} /></TableCell>
                 <TableCell className="widgetLgDate">{new Date(user.createdAt).toLocaleDateString()}</TableCell>
                 <TableCell className="widgetLgDate">{new Date(user.updatedAt).toLocaleDateString()}</TableCell>
-          
               </TableRow>
             ))}
           </TableBody>

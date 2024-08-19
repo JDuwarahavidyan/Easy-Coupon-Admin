@@ -1,11 +1,10 @@
 import React from './sidebar.css'
 import LineStyleIcon from '@mui/icons-material/LineStyle';
-import TrendingUpIcon from '@mui/icons-material/TrendingUp';
 import TimelineIcon from '@mui/icons-material/Timeline';
 import PermIdentityIcon from '@mui/icons-material/PermIdentity';
-import PlayCircleOutlineIcon from '@mui/icons-material/PlayCircleOutline';
 import { Link } from 'react-router-dom';
-import ListIcon from '@mui/icons-material/List';
+import AssessmentOutlinedIcon from '@mui/icons-material/AssessmentOutlined';
+
 
 export default function Sidebar() {
   return (
@@ -25,10 +24,6 @@ export default function Sidebar() {
               Analytics
             </li>
 
-            {/* <li className="sidebarListItem">
-              <TrendingUpIcon className='sidebarIcon'/>
-              Sales
-            </li> */}
 
           </ul>
         </div>
@@ -44,8 +39,8 @@ export default function Sidebar() {
             </Link>
             <Link to="/movies" className='link'>
               <li className="sidebarListItem">
-                <PlayCircleOutlineIcon className="sidebarIcon" />
-                Movies
+                <AssessmentOutlinedIcon className="sidebarIcon" />
+                Reports
               </li>
             </Link>
             

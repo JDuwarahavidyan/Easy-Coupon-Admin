@@ -5,6 +5,7 @@ import WidgetLg from '../../components/widgetLg/WidgetLg';
 import axios from 'axios';
 import { useEffect, useMemo, useState } from 'react';
 import FeaturedInfo from '../../components/featuredInfo/FeaturedInfo';
+// eslint-disable-next-line no-unused-vars
 import CircularProgress from '@material-ui/core/CircularProgress';
 
 export default function Home() {
@@ -57,11 +58,11 @@ export default function Home() {
   }, [MONTHS]);
 
   if (loading) {
-    return (
-      <div className="home">
-        <CircularProgress />
-      </div>
-    );
+    // return (
+    //   <div className="home loadingContainer">
+    //     <CircularProgress />
+    //   </div>
+    // );
   }
 
   return (

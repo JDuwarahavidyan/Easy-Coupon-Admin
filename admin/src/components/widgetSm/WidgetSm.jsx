@@ -1,4 +1,4 @@
-import './widgetSm.css'
+import './widgetSm.css';
 import { styled } from '@mui/material/styles';
 import * as React from 'react';
 import Badge from '@mui/material/Badge';
@@ -9,39 +9,41 @@ import Button from '@mui/material/Button';
 import { useEffect, useState } from 'react';
 import axios from 'axios';
 import { Link } from 'react-router-dom';
+// eslint-disable-next-line no-unused-vars
+import CircularProgress from '@mui/material/CircularProgress'; 
 
 const StyledBadge = styled(Badge)(({ theme }) => ({
     '& .MuiBadge-badge': {
-      backgroundColor: '#44b700',
-      color: '#44b700',
-      boxShadow: `0 0 0 2px ${theme.palette.background.paper}`,
-      '&::after': {
-        position: 'absolute',
-        top: 0,
-        left: 0,
-        width: '100%',
-        height: '100%',
-        borderRadius: '50%',
-        animation: 'ripple 1.2s infinite ease-in-out',
-        border: '1px solid currentColor',
-        content: '""',
-      },
+        backgroundColor: '#44b700',
+        color: '#44b700',
+        boxShadow: `0 0 0 2px ${theme.palette.background.paper}`,
+        '&::after': {
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            width: '100%',
+            height: '100%',
+            borderRadius: '50%',
+            animation: 'ripple 1.2s infinite ease-in-out',
+            border: '1px solid currentColor',
+            content: '""',
+        },
     },
     '@keyframes ripple': {
-      '0%': {
-        transform: 'scale(.8)',
-        opacity: 1,
-      },
-      '100%': {
-        transform: 'scale(2.4)',
-        opacity: 0,
-      },
+        '0%': {
+            transform: 'scale(.8)',
+            opacity: 1,
+        },
+        '100%': {
+            transform: 'scale(2.4)',
+            opacity: 0,
+        },
     },
-  }));
-  
+}));
 
 export default function WidgetSm() {
     const [newUsers, setNewUsers] = useState([]);
+    const [loading, setLoading] = useState(true); // Add loading state
 
     useEffect(() => {
         const getNewUsers = async () => {
@@ -51,14 +53,23 @@ export default function WidgetSm() {
                         authorization: "Bearer " + JSON.parse(localStorage.getItem("user")).customToken,
                     },
                 });
-                // Slice to get only the first 5 users
                 setNewUsers(res.data.slice(0, 6));
             } catch (err) {
                 console.log(err);
+            } finally {
+                setLoading(false); // Set loading to false after data is fetched
             }
         };
         getNewUsers();
     }, []);
+
+    if (loading) {
+        // return (
+        //     <div className="loadingContainer">
+        //         <CircularProgress /> {/* Centered loading spinner */}
+        //     </div>
+        // );
+    }
 
     return (
         <div className='widgetSm'>

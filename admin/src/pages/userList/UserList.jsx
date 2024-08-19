@@ -5,7 +5,7 @@ import { Link } from "react-router-dom";
 import { useState, useContext, useEffect } from "react";
 import Avatar from '@mui/material/Avatar';
 import { UserContext } from '../../context/userContext/UserContext';
-import { deleteUser, getUsers } from "../../context/userContext/apiCalls";
+import { deleteUser, getUsers, disableUser, enableUser } from "../../context/userContext/apiCalls";
 import Button from '@mui/material/Button';
 import Dialog from '@mui/material/Dialog';
 import DialogActions from '@mui/material/DialogActions';
@@ -48,104 +48,102 @@ export default function UserList() {
     setRoleFilter(newValue);
   };
 
+  const handleToggleUserStatus = async (id, isDisabled) => {
+    setLoading(true);
   
-  const getColumns = () => {
-    switch(roleFilter) {
-      case 'student':
-        return [
-          { field: "id", headerName: "ID", width: 300 },
-          { 
-            field: "userName", 
-            headerName: "User Name", 
-            width: 200, 
-            renderCell: (params) => (
-              <div className="userListUser">
-                <Avatar className="userListImg" src={params.row.avatar || "https://www.pngkey.com/png/full/114-1149878_setting-user-avatar-in-specific-size-without-breaking.png"} alt=""/>
-                {params.row.userName}
-              </div>
-            )
-          },
-          { field: "email", headerName: "Email", width: 300 },
-          { field: "studentCount", headerName: "Count", width: 150 },
-          {
-            field: "action",
-            headerName: "Action",
-            width: 150,
-            renderCell: (params) => (
-              <>
-                <Link to={"/user/" + params.row.id}>
-                  <button className="userListEdit">Edit</button>
-                </Link>
-                <DeleteOutlineIcon className="userListDelete" onClick={() => handleClickOpen(params.row.id)} />
-              </>
-            )
-          },
-        ];
-      case 'canteen':
-        return [
-          { field: "id", headerName: "ID", width: 300 },
-          { 
-            field: "userName", 
-            headerName: "User Name", 
-            width: 200, 
-            renderCell: (params) => (
-              <div className="userListUser">
-                <Avatar className="userListImg" src={params.row.avatar || "https://www.pngkey.com/png/full/114-1149878_setting-user-avatar-in-specific-size-without-breaking.png"} alt=""/>
-                {params.row.userName}
-              </div>
-            )
-          },
-          { field: "email", headerName: "Email", width: 300 },
-          { field: "role", headerName: "Role", width: 110 },
-          { field: "canteenCount", headerName: "Count", width: 115 },
-          {
-            field: "action",
-            headerName: "Action",
-            width: 150,
-            renderCell: (params) => (
-              <>
-                <Link to={"/user/" + params.row.id}>
-                  <button className="userListEdit">Edit</button>
-                </Link>
-                <DeleteOutlineIcon className="userListDelete" onClick={() => handleClickOpen(params.row.id)} />
-              </>
-            )
-          },
-        ];
-      case 'admin':
-      case 'all':
-      default:
-        return [
-          { field: "id", headerName: "ID", width: 300 },
-          { 
-            field: "userName", 
-            headerName: "User Name", 
-            width: 200, 
-            renderCell: (params) => (
-              <div className="userListUser">
-                <Avatar className="userListImg" src={params.row.avatar || "https://www.pngkey.com/png/full/114-1149878_setting-user-avatar-in-specific-size-without-breaking.png"} alt=""/>
-                {params.row.userName}
-              </div>
-            )
-          },
-          { field: "email", headerName: "Email", width: 300 },
-          { field: "role", headerName: "Role", width: 150 },
-          {
-            field: "action",
-            headerName: "Action",
-            width: 150,
-            renderCell: (params) => (
-              <>
-                <Link to={"/user/" + params.row.id}>
-                  <button className="userListEdit">Edit</button>
-                </Link>
-                <DeleteOutlineIcon className="userListDelete" onClick={() => handleClickOpen(params.row.id)} />
-              </>
-            )
-          },
-        ];
+    // Create a new array with the updated user status
+    const updatedUsers = users.map(user =>
+      user.id === id ? { ...user, disabled: !isDisabled } : user
+    );
+
+  
+    dispatch({ type: "SET_USERS", payload: updatedUsers });
+  
+    try {
+
+      if (isDisabled) {
+        await enableUser(id, dispatch);
+      } else {
+        await disableUser(id, dispatch);
+      }
+    } catch (err) {
+      // Revert the optimistic update if there's an error
+      console.error("Failed to toggle user status", err);
+      const revertedUsers = users.map(user =>
+        user.id === id ? { ...user, disabled: isDisabled } : user
+      );
+      dispatch({ type: "SET_USERS", payload: revertedUsers });
+    } finally {
+      // Ensure loading state is reset
+      setLoading(false);
     }
-  }
+  };
+  
+  
+
+  const getColumns = () => {
+    const baseColumns = [
+      { field: "id", headerName: "ID", width: 300 },
+      { 
+        field: "userName", 
+        headerName: "User Name", 
+        width: 200, 
+        renderCell: (params) => (
+          <div className="userListUser">
+            <Avatar className="userListImg" src={params.row.avatar || "https://www.pngkey.com/png/full/114-1149878_setting-user-avatar-in-specific-size-without-breaking.png"} alt=""/>
+            {params.row.userName}
+          </div>
+        )
+      },
+      { field: "email", headerName: "Email", width: 300 },
+    ];
+  
+    // Add custom columns based on the role filter
+    if (roleFilter === 'student') {
+      baseColumns.push({ field: "studentCount", headerName: "Count", width: 150 });
+    } else if (roleFilter === 'canteen') {
+      baseColumns.push({ field: "canteenCount", headerName: "Count", width: 115 });
+    } else {
+      baseColumns.push({ field: "role", headerName: "Role", width: 150 });
+    }
+  
+    // Add the enable/disable button column
+    baseColumns.push({
+      field: "status",
+      headerName: "Status",
+      width: 150,
+      renderCell: (params) => {
+        // console.log("Rendering status for row:", params.row); // Check what data is being passed
+  
+        return (
+          <Button
+            variant={params.row.disabled ? "outlined" : "contained"}
+            color={params.row.disabled ? "error" : "success"}
+            onClick={() => handleToggleUserStatus(params.row.id, params.row.disabled)}
+          >
+            {params.row.disabled ? "Enable" : "Disable"}
+          </Button>
+        );
+      }
+    });
+  
+    // Add the action column
+    baseColumns.push({
+      field: "action",
+      headerName: "Action",
+      width: 150,
+      renderCell: (params) => (
+        <>
+          <Link to={"/user/" + params.row.id}>
+            <button className="userListEdit">Edit</button>
+          </Link>
+          <DeleteOutlineIcon className="userListDelete" onClick={() => handleClickOpen(params.row.id)} />
+        </>
+      )
+    });
+  
+    return baseColumns;
+  };
 
   const columns = getColumns();
 

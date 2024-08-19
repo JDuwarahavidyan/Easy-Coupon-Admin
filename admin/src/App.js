@@ -14,46 +14,40 @@ import MovieList from "./pages/movieList/MovieList";
 import Movie from "./pages/movie/movie";
 import NewMovie from "./pages/newMovie/NewMovie";
 
-
-
-
 function App() {
-
   const { user } = useContext(AuthContext);
 
   return (
     <Router>
       <Routes>
-        <Route path="/login" element={!user ? <Login />: <Navigate to="/"/>} /> 
+        <Route path="/" element={!user ? <Login /> : <Navigate to="/home" />} />
 
-        {user &&(
-
-          <Route 
+        {user && (
+          <Route
             path="/*"
             element={
-            <>
-              <Topbar />
-              <div className="container">
-                <Sidebar />
-                <Routes>
-                  <Route exact path="/" element={user ? <Home />: <Navigate to="/login"/>} />
+              <>
+                <Topbar />
+                <div className="container">
+                  <Sidebar />
+                  <Routes>
+                    <Route exact path="/home" element={<Home />} />
+                    
+                    <Route path="/users" element={<UserList />} />
+                    <Route path="/user/:userID" element={<User />} />
+                    <Route path="/newUser" element={<NewUser />} />
 
-                  <Route path="/users" element={<UserList />} />
-                  <Route path="/user/:userID" element={<User />} />
-                  <Route path="/newUser" element={<NewUser />} />
-
-                  <Route path="/movies" element={<MovieList />} />
-                  <Route path="/movie/:productID" element={<Movie />} />
-                  <Route path="/newMovie" element={<NewMovie />} />
-
-          
-
-                </Routes>
-              </div>
-            </>
+                    <Route path="/movies" element={<MovieList />} />
+                    <Route path="/movie/:productID" element={<Movie />} />
+                    <Route path="/newMovie" element={<NewMovie />} />
+                  </Routes>
+                </div>
+              </>
             }
           />
         )}
+
+        <Route path="/" element={<Navigate to="/login" />} />
       </Routes>
     </Router>
   );

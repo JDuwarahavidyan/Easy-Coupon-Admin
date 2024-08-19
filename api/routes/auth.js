@@ -65,6 +65,8 @@ router.post('/register', async (req, res) => {
 });
 
 // Login route
+const axios = require('axios');
+
 router.post('/login', async (req, res) => {
     const { userName, password } = req.body;
     const db = req.db;
@@ -87,9 +89,16 @@ router.post('/login', async (req, res) => {
 
         const email = userData.email;
 
-        const user = await admin.auth().getUserByEmail(email);
-        const userId = user.uid;
+        // Use Firebase REST API to sign in with email and password
+        const response = await axios.post(`https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=${process.env.FIREBASE_API_KEY}`, {
+            email,
+            password,
+            returnSecureToken: true
+        });
 
+        const userId = response.data.localId;
+
+        // Generate a custom token for the authenticated user
         const customToken = await admin.auth().createCustomToken(userId);
 
         res.status(200).json({
@@ -97,9 +106,10 @@ router.post('/login', async (req, res) => {
             uid: userId,
         });
     } catch (error) {
-        res.status(400).json({ error: error.message });
+        res.status(400).json({ error: error.response ? error.response.data.error.message : error.message });
     }
 });
+
 
 
 module.exports = router;
