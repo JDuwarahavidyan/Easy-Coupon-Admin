@@ -5,7 +5,7 @@ import { Link } from "react-router-dom";
 import { useState, useContext, useEffect } from "react";
 import Avatar from '@mui/material/Avatar';
 import { UserContext } from '../../context/userContext/UserContext';
-import { deleteUser, getUsers, disableUser, enableUser } from "../../context/userContext/apiCalls";
+import { deleteUser, getUsers, enableUser, disableUser } from "../../context/userContext/apiCalls";
 import Button from '@mui/material/Button';
 import Dialog from '@mui/material/Dialog';
 import DialogActions from '@mui/material/DialogActions';
@@ -25,8 +25,14 @@ export default function UserList() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    getUsers(dispatch).finally(() => setLoading(false));
+    fetchUsers();
   }, [dispatch]);
+
+  const fetchUsers = async () => {
+    setLoading(true);
+    await getUsers(dispatch);
+    setLoading(false);
+  };
 
   const handleClickOpen = (id) => {
     setSelectedUserId(id);
@@ -38,48 +44,39 @@ export default function UserList() {
     setSelectedUserId(null);
   };
 
-  const handleDelete = () => {
-    deleteUser(selectedUserId, dispatch);
+  const handleDelete = async () => {
+    await deleteUser(selectedUserId, dispatch);
     handleClose();
-    window.location.reload();
+    fetchUsers(); // Re-fetch users after deletion
   };
 
   const handleTabChange = (event, newValue) => {
     setRoleFilter(newValue);
   };
 
-  const handleToggleUserStatus = async (id, isDisabled) => {
+  const handleEnable = async (id) => {
     setLoading(true);
-  
-    // Create a new array with the updated user status
-    const updatedUsers = users.map(user =>
-      user.id === id ? { ...user, disabled: !isDisabled } : user
-    );
-
-  
-    dispatch({ type: "SET_USERS", payload: updatedUsers });
-  
-    try {
-
-      if (isDisabled) {
-        await enableUser(id, dispatch);
-      } else {
-        await disableUser(id, dispatch);
-      }
-    } catch (err) {
-      // Revert the optimistic update if there's an error
-      console.error("Failed to toggle user status", err);
-      const revertedUsers = users.map(user =>
-        user.id === id ? { ...user, disabled: isDisabled } : user
-      );
-      dispatch({ type: "SET_USERS", payload: revertedUsers });
-    } finally {
-      // Ensure loading state is reset
-      setLoading(false);
-    }
+    await enableUser(id, dispatch);
+    // Update the user in the local state
+    updateUserStatus(id, false);
+    setLoading(false);
   };
-  
-  
+
+  const handleDisable = async (id) => {
+    setLoading(true);
+    await disableUser(id, dispatch);
+    // Update the user in the local state
+    updateUserStatus(id, true);
+    setLoading(false);
+  };
+
+  const updateUserStatus = (id, disabled) => {
+    // Find the user by id and update their status in the local state
+    const updatedUsers = users.map(user =>
+      user.id === id ? { ...user, disabled } : user
+    );
+    dispatch({ type: "GET_USERS_SUCCESS", payload: updatedUsers });
+  };
 
   const getColumns = () => {
     const baseColumns = [
@@ -95,38 +92,47 @@ export default function UserList() {
           </div>
         )
       },
-      { field: "email", headerName: "Email", width: 300 },
+      { field: "fullName", headerName: "Full Name", width: 200 }, // New fullName column
+      { field: "email", headerName: "Email", width: 230 },
+      { 
+        field: "role", 
+        headerName: "Role", 
+        width: 150 
+      }, // Role column before status
+      { 
+        field: "status", 
+        headerName: "Status", 
+        width: 150, 
+        renderCell: (params) => (
+          <div>
+            {params.row.disabled ? (
+              <Button 
+                variant="contained" 
+                color="secondary" 
+                onClick={() => handleEnable(params.row.id)}
+              >
+                Enable
+              </Button>
+            ) : (
+              <Button 
+                variant="contained" 
+                color="primary" 
+                onClick={() => handleDisable(params.row.id)}
+              >
+                Disable
+              </Button>
+            )}
+          </div>
+        )
+      },
     ];
-  
-    // Add custom columns based on the role filter
+
     if (roleFilter === 'student') {
       baseColumns.push({ field: "studentCount", headerName: "Count", width: 150 });
     } else if (roleFilter === 'canteen') {
       baseColumns.push({ field: "canteenCount", headerName: "Count", width: 115 });
-    } else {
-      baseColumns.push({ field: "role", headerName: "Role", width: 150 });
     }
-  
-    // Add the enable/disable button column
-    baseColumns.push({
-      field: "status",
-      headerName: "Status",
-      width: 150,
-      renderCell: (params) => {
-        // console.log("Rendering status for row:", params.row); // Check what data is being passed
-  
-        return (
-          <Button
-            variant={params.row.disabled ? "outlined" : "contained"}
-            color={params.row.disabled ? "error" : "success"}
-            onClick={() => handleToggleUserStatus(params.row.id, params.row.disabled)}
-          >
-            {params.row.disabled ? "Enable" : "Disable"}
-          </Button>
-        );
-      }
-    });
-  
+
     // Add the action column
     baseColumns.push({
       field: "action",
@@ -141,7 +147,7 @@ export default function UserList() {
         </>
       )
     });
-  
+
     return baseColumns;
   };
 

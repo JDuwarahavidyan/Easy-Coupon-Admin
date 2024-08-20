@@ -1,4 +1,3 @@
-// mail.js
 const nodemailer = require('nodemailer');
 require('dotenv').config(); // Load environment variables
 
@@ -11,15 +10,21 @@ const transporter = nodemailer.createTransport({
   }
 });
 
-// Function to send email
-const sendEmail = async (to, subject, userName) => {
+// Helper function to capitalize the first letter of the user's name
+const capitalizeFirstLetter = (string) => {
+  return string.charAt(0).toUpperCase() + string.slice(1).toLowerCase();
+};
+
+// Common function to send an email with a flexible message body
+const sendEmail = async (to, subject, userName, message) => {
+  const formattedUserName = capitalizeFirstLetter(userName);
   const mailOptions = {
     from: process.env.EMAIL_USER,
     to,
     subject,
-    text: `Dear ${userName},
+    text: `Dear ${formattedUserName},
 
-${subject}
+${message}
 
 Thank you.
 
