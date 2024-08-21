@@ -6,7 +6,8 @@ import axios from 'axios';
 import { useEffect, useMemo, useState } from 'react';
 import FeaturedInfo from '../../components/featuredInfo/FeaturedInfo';
 // eslint-disable-next-line no-unused-vars
-import CircularProgress from '@material-ui/core/CircularProgress';
+import CircularProgress from '@mui/material/CircularProgress';
+
 
 export default function Home() {
   const MONTHS = useMemo(

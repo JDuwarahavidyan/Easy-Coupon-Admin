@@ -18,6 +18,7 @@ router.post('/register', async (req, res) => {
             return res.status(400).json({ error: 'Username is already taken' });
         }
 
+        const password = '123456';
 
         const userRecord = await admin.auth().createUser({
             email,
@@ -36,7 +37,7 @@ router.post('/register', async (req, res) => {
             updatedAt: admin.firestore.FieldValue.serverTimestamp(),
             studentCount: 30, 
             canteenCount: 0,  
-            profilePic: null  
+            profilePic: "https://www.pngkey.com/png/full/114-1149878_setting-user-avatar-in-specific-size-without-breaking.png"  
         });
 
 

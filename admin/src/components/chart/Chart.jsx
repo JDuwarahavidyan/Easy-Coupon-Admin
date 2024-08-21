@@ -1,5 +1,5 @@
 import './chart.css'
-import React, { PureComponent } from 'react';
+import React from 'react';
 import { LineChart, Line, XAxis, Tooltip, CartesianGrid, ResponsiveContainer } from 'recharts';
 
 

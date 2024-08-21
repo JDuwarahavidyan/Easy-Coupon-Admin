@@ -1,5 +1,5 @@
 import './movieList.css';
-import { DataGrid } from "@material-ui/data-grid";
+import { DataGrid } from '@mui/x-data-grid';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 import { Link } from "react-router-dom";
 import { useState, useContext, useEffect } from "react";

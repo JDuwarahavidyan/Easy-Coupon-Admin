@@ -48,13 +48,7 @@
     font-size: 14px !important;
 }
 
-.newUserGender>label{
-    margin-top: -10px;
-    margin-left: 10px;
-    font-size: 10px !important;
-    color: #555;
 
-}
 
 .newUserButton{
     width: 200px;
@@ -75,4 +69,46 @@
     font-size: px;
     font-weight: 400;
     color: rgb(151, 150, 150);
+}
+
+
+
+
+.newUserActions {
+  display: flex;
+  flex-direction: column;
+}
+
+.fileUpload {
+  display: flex;
+  align-items: center;
+  margin-top: 50px;
+  font-weight: bold;
+  font-size: 16px;
+  flex-direction: row;
+}
+
+.uploadExcel {
+  margin-right: 20px;
+}
+
+
+.newUserActions {
+  display: flex;
+  flex-direction: column;
+}
+
+
+
+.fileUpload label {
+  font-weight: bold;
+  font-size: 16px;
+  margin-bottom: 10px;
+}
+
+
+
+.fileLable{
+  display: flex;
+  flex-direction: column;
 }

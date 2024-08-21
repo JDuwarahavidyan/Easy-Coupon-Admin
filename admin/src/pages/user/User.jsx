@@ -1,6 +1,6 @@
 import './user.css'
 import { Stack } from '@mui/material'
-import { Avatar } from '@material-ui/core'
+import { Avatar } from '@mui/material'
 import PermIdentityIcon from '@mui/icons-material/PermIdentity';
 import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
 import PhoneAndroidIcon from '@mui/icons-material/PhoneAndroid';

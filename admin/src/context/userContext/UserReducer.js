@@ -39,7 +39,7 @@ const UserReducer = (state, action) => {
       return {
         ...state,
         isFetching: false,
-        error: true,
+        error: action.payload,
       };
 
     case "UPDATE_USER_START":

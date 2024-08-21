@@ -17,7 +17,7 @@ export default function Topbar() {
     const handleLogout = () => {
         dispatch(logout()); // Dispatch the logout action
         localStorage.removeItem("user"); // Remove user data from localStorage
-        navigate("/login"); // Navigate to the login page
+        navigate("/"); // Navigate to the login page
     };
 
     return (

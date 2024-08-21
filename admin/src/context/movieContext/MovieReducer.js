@@ -81,10 +81,10 @@ const MovieReducer = (state, action) => {
         isFetching: false,
         error: false,
       };
-    
+      
       case "DELETE_MOVIE_FAILURE":
       return {
-        ... state,
+        ... state, 
         isFetching: false,
         error: true,
       };

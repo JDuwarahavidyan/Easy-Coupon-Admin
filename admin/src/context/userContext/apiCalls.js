@@ -40,14 +40,14 @@ export const getUsers = async (dispatch) => {
 export const createUser = async (User, dispatch) => {
     dispatch(createUserStart());
     try {
-        const res = await axios.post("/users", User, {
+        const res = await axios.post("/auth/register", User, {
         headers: {
           authorization: "Bearer " + JSON.parse(localStorage.getItem("user")).customToken,
         },
       });
       dispatch(createUserSuccess(res.data));
     } catch (err) {
-      dispatch(createUserFailure());
+      dispatch(createUserFailure(err.response.data.error ));
     }
 };
 

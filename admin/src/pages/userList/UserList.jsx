@@ -1,5 +1,5 @@
 import "./userList.css";
-import { DataGrid } from "@material-ui/data-grid";
+import { DataGrid } from '@mui/x-data-grid';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 import { Link } from "react-router-dom";
 import { useState, useContext, useEffect } from "react";
@@ -24,11 +24,11 @@ export default function UserList() {
   const [roleFilter, setRoleFilter] = useState('all');
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    fetchUsers();
-  }, [dispatch]);
+  useEffect(() => { 
+    fetchUsers();  // eslint-disable-next-line
+  }, [dispatch]); 
 
-  const fetchUsers = async () => {
+  const fetchUsers = async () => { 
     setLoading(true);
     await getUsers(dispatch);
     setLoading(false);
@@ -168,9 +168,9 @@ export default function UserList() {
           <Tab label="Canteen" value="canteen" />
           <Tab label="Admin" value="admin" />
         </Tabs>
-        <Button variant="contained" color="primary" onClick={() => {/* handle create user */}}>
-          Create New User
-        </Button>
+        <Link to="/newUser">
+            <button className="userAddButton">Create</button>
+        </Link>
       </Box>
 
       {loading ? (
