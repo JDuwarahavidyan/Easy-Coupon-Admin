@@ -12,6 +12,12 @@ import {
   deleteUserFailure,
   deleteUserStart,
   deleteUserSuccess,
+  disableUserFailure,
+  disableUserStart,
+  disableUserSuccess,
+  enableUserFailure,
+  enableUserStart,
+  enableUserSuccess
 
 } from "./UserAction"
 
@@ -74,4 +80,34 @@ export const deleteUser = async (id, dispatch) => {
     } catch (err) {
       dispatch(deleteUserFailure());
     }
+};
+
+// DISABLE User
+export const disableUser = async (id, dispatch) => {
+  dispatch(disableUserStart());
+  try {
+    const res = await axios.put("/users/disable/" + id, null, {
+      headers: {
+        authorization: "Bearer " + JSON.parse(localStorage.getItem("user")).customToken,
+      },
+    });
+    dispatch(disableUserSuccess(res.data));
+  } catch (err) {
+    dispatch(disableUserFailure());
+  }
+};
+
+// ENABLE User
+export const enableUser = async (id, dispatch) => {
+  dispatch(enableUserStart());
+  try {
+    const res = await axios.put("/users/enable/" + id, null, {
+      headers: {
+        authorization: "Bearer " + JSON.parse(localStorage.getItem("user")).customToken,
+      },
+    });
+    dispatch(enableUserSuccess(res.data));
+  } catch (err) {
+    dispatch(enableUserFailure());
+  }
 };

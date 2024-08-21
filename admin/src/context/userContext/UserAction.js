@@ -50,4 +50,32 @@ export const deleteUserFailure = () => ({
     type: "DELETE_USERS_FAILURE",
 });
 
- 
+
+export const disableUserStart = () => ({
+    type: "DISABLE_USER_START",
+});
+
+
+export const disableUserSuccess = (message) => ({
+    type: "DISABLE_USER_SUCCESS",
+    payload: message,
+});
+
+export const disableUserFailure = () => ({
+    type: "DISABLE_USER_FAILURE",
+});
+
+
+export const enableUserStart = () => ({
+    type: "ENABLE_USER_START",
+});
+
+
+export const enableUserSuccess = (message) => ({
+    type: "ENABLE_USER_SUCCESS",
+    payload: message,
+});
+
+export const enableUserFailure = () => ({
+    type: "ENABLE_USER_FAILURE",
+});

@@ -1,7 +1,7 @@
 .sidebar {
     flex: 1; /*givig side bar a value here side bar is one unit and other content are 4 units*/
     height: calc(100vh - 75px);
-    background-color: #e5f0ff;
+    background-color: #DBE7C9;
     position: sticky;
     top: 75px;
 }
@@ -19,7 +19,7 @@
 
 .sidebarTitle{
     font-size: 15px;
-    color: rgb(19, 91, 124);
+    color: #50623A;
     font-weight: 700;
    
 }

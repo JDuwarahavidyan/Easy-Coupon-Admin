@@ -5,7 +5,7 @@ import { Link } from "react-router-dom";
 import { useState, useContext, useEffect } from "react";
 import Avatar from '@mui/material/Avatar';
 import { UserContext } from '../../context/userContext/UserContext';
-import { deleteUser, getUsers } from "../../context/userContext/apiCalls";
+import { deleteUser, getUsers, enableUser, disableUser } from "../../context/userContext/apiCalls";
 import Button from '@mui/material/Button';
 import Dialog from '@mui/material/Dialog';
 import DialogActions from '@mui/material/DialogActions';
@@ -25,8 +25,14 @@ export default function UserList() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    getUsers(dispatch).finally(() => setLoading(false));
+    fetchUsers();
   }, [dispatch]);
+
+  const fetchUsers = async () => {
+    setLoading(true);
+    await getUsers(dispatch);
+    setLoading(false);
+  };
 
   const handleClickOpen = (id) => {
     setSelectedUserId(id);
@@ -38,114 +44,110 @@ export default function UserList() {
     setSelectedUserId(null);
   };
 
-  const handleDelete = () => {
-    deleteUser(selectedUserId, dispatch);
+  const handleDelete = async () => {
+    await deleteUser(selectedUserId, dispatch);
     handleClose();
-    window.location.reload();
+    fetchUsers(); // Re-fetch users after deletion
   };
 
   const handleTabChange = (event, newValue) => {
     setRoleFilter(newValue);
   };
 
-  
+  const handleEnable = async (id) => {
+    setLoading(true);
+    await enableUser(id, dispatch);
+    // Update the user in the local state
+    updateUserStatus(id, false);
+    setLoading(false);
+  };
+
+  const handleDisable = async (id) => {
+    setLoading(true);
+    await disableUser(id, dispatch);
+    // Update the user in the local state
+    updateUserStatus(id, true);
+    setLoading(false);
+  };
+
+  const updateUserStatus = (id, disabled) => {
+    // Find the user by id and update their status in the local state
+    const updatedUsers = users.map(user =>
+      user.id === id ? { ...user, disabled } : user
+    );
+    dispatch({ type: "GET_USERS_SUCCESS", payload: updatedUsers });
+  };
+
   const getColumns = () => {
-    switch(roleFilter) {
-      case 'student':
-        return [
-          { field: "id", headerName: "ID", width: 300 },
-          { 
-            field: "userName", 
-            headerName: "User Name", 
-            width: 200, 
-            renderCell: (params) => (
-              <div className="userListUser">
-                <Avatar className="userListImg" src={params.row.avatar || "https://www.pngkey.com/png/full/114-1149878_setting-user-avatar-in-specific-size-without-breaking.png"} alt=""/>
-                {params.row.userName}
-              </div>
-            )
-          },
-          { field: "email", headerName: "Email", width: 300 },
-          { field: "studentCount", headerName: "Count", width: 150 },
-          {
-            field: "action",
-            headerName: "Action",
-            width: 150,
-            renderCell: (params) => (
-              <>
-                <Link to={"/user/" + params.row.id}>
-                  <button className="userListEdit">Edit</button>
-                </Link>
-                <DeleteOutlineIcon className="userListDelete" onClick={() => handleClickOpen(params.row.id)} />
-              </>
-            )
-          },
-        ];
-      case 'canteen':
-        return [
-          { field: "id", headerName: "ID", width: 300 },
-          { 
-            field: "userName", 
-            headerName: "User Name", 
-            width: 200, 
-            renderCell: (params) => (
-              <div className="userListUser">
-                <Avatar className="userListImg" src={params.row.avatar || "https://www.pngkey.com/png/full/114-1149878_setting-user-avatar-in-specific-size-without-breaking.png"} alt=""/>
-                {params.row.userName}
-              </div>
-            )
-          },
-          { field: "email", headerName: "Email", width: 300 },
-          { field: "role", headerName: "Role", width: 110 },
-          { field: "canteenCount", headerName: "Count", width: 115 },
-          {
-            field: "action",
-            headerName: "Action",
-            width: 150,
-            renderCell: (params) => (
-              <>
-                <Link to={"/user/" + params.row.id}>
-                  <button className="userListEdit">Edit</button>
-                </Link>
-                <DeleteOutlineIcon className="userListDelete" onClick={() => handleClickOpen(params.row.id)} />
-              </>
-            )
-          },
-        ];
-      case 'admin':
-      case 'all':
-      default:
-        return [
-          { field: "id", headerName: "ID", width: 300 },
-          { 
-            field: "userName", 
-            headerName: "User Name", 
-            width: 200, 
-            renderCell: (params) => (
-              <div className="userListUser">
-                <Avatar className="userListImg" src={params.row.avatar || "https://www.pngkey.com/png/full/114-1149878_setting-user-avatar-in-specific-size-without-breaking.png"} alt=""/>
-                {params.row.userName}
-              </div>
-            )
-          },
-          { field: "email", headerName: "Email", width: 300 },
-          { field: "role", headerName: "Role", width: 150 },
-          {
-            field: "action",
-            headerName: "Action",
-            width: 150,
-            renderCell: (params) => (
-              <>
-                <Link to={"/user/" + params.row.id}>
-                  <button className="userListEdit">Edit</button>
-                </Link>
-                <DeleteOutlineIcon className="userListDelete" onClick={() => handleClickOpen(params.row.id)} />
-              </>
-            )
-          },
-        ];
+    const baseColumns = [
+      { field: "id", headerName: "ID", width: 300 },
+      { 
+        field: "userName", 
+        headerName: "User Name", 
+        width: 200, 
+        renderCell: (params) => (
+          <div className="userListUser">
+            <Avatar className="userListImg" src={params.row.avatar || "https://www.pngkey.com/png/full/114-1149878_setting-user-avatar-in-specific-size-without-breaking.png"} alt=""/>
+            {params.row.userName}
+          </div>
+        )
+      },
+      { field: "fullName", headerName: "Full Name", width: 200 }, // New fullName column
+      { field: "email", headerName: "Email", width: 230 },
+      { 
+        field: "role", 
+        headerName: "Role", 
+        width: 150 
+      }, // Role column before status
+      { 
+        field: "status", 
+        headerName: "Status", 
+        width: 150, 
+        renderCell: (params) => (
+          <div>
+            {params.row.disabled ? (
+              <Button 
+                className="customButton"
+                onClick={() => handleEnable(params.row.id)}
+              >
+                Enable
+              </Button>
+            ) : (
+              <Button 
+                className="disableButton"
+                onClick={() => handleDisable(params.row.id)}
+              >
+                Disable
+              </Button>
+            )}
+          </div>
+        )
+      },
+    ];
+
+    if (roleFilter === 'student') {
+      baseColumns.push({ field: "studentCount", headerName: "Count", width: 150 });
+    } else if (roleFilter === 'canteen') {
+      baseColumns.push({ field: "canteenCount", headerName: "Count", width: 115 });
     }
-  }
+
+    // Add the action column
+    baseColumns.push({
+      field: "action",
+      headerName: "Action",
+      width: 150,
+      renderCell: (params) => (
+        <>
+          <Link to={"/user/" + params.row.id}>
+            <button className="userListEdit">Edit</button>
+          </Link>
+          <DeleteOutlineIcon className="userListDelete" onClick={() => handleClickOpen(params.row.id)} />
+        </>
+      )
+    });
+
+    return baseColumns;
+  };
 
   const columns = getColumns();
 
@@ -164,9 +166,14 @@ export default function UserList() {
           <Tab label="Canteen" value="canteen" />
           <Tab label="Admin" value="admin" />
         </Tabs>
-        <Button variant="contained" color="primary" onClick={() => {/* handle create user */}}>
-          Create New User
-        </Button>
+        <Button
+        variant="contained"
+        color="primary"
+        onClick={() => {/* handle create user */}}
+        sx={{ ml: 10 }}  // Adds margin to the left of the button
+      >
+        Create New User
+      </Button>
       </Box>
 
       {loading ? (
