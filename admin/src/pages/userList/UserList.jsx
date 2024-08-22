@@ -24,11 +24,11 @@ export default function UserList() {
   const [roleFilter, setRoleFilter] = useState('all');
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => { 
+  useEffect(() => {
     fetchUsers();  // eslint-disable-next-line
-  }, [dispatch]); 
+  }, [dispatch]);
 
-  const fetchUsers = async () => { 
+  const fetchUsers = async () => {
     setLoading(true);
     await getUsers(dispatch);
     setLoading(false);
@@ -81,42 +81,42 @@ export default function UserList() {
   const getColumns = () => {
     const baseColumns = [
       { field: "id", headerName: "ID", width: 300 },
-      { 
-        field: "userName", 
-        headerName: "User Name", 
-        width: 200, 
+      {
+        field: "userName",
+        headerName: "User Name",
+        width: 200,
         renderCell: (params) => (
           <div className="userListUser">
-            <Avatar className="userListImg" src={params.row.avatar || "https://www.pngkey.com/png/full/114-1149878_setting-user-avatar-in-specific-size-without-breaking.png"} alt=""/>
+            <Avatar className="userListImg" src={params.row.avatar || "https://www.pngkey.com/png/full/114-1149878_setting-user-avatar-in-specific-size-without-breaking.png"} alt="" />
             {params.row.userName}
           </div>
         )
       },
       { field: "fullName", headerName: "Full Name", width: 200 }, // New fullName column
       { field: "email", headerName: "Email", width: 230 },
-      { 
-        field: "role", 
-        headerName: "Role", 
-        width: 150 
+      {
+        field: "role",
+        headerName: "Role",
+        width: 150
       }, // Role column before status
-      { 
-        field: "status", 
-        headerName: "Status", 
-        width: 150, 
+      {
+        field: "status",
+        headerName: "Status",
+        width: 150,
         renderCell: (params) => (
-          <div>
+          <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
             {params.row.disabled ? (
-              <Button 
-                variant="contained" 
-                color="secondary" 
+              <Button
+                variant="contained"
+                color="secondary"
                 onClick={() => handleEnable(params.row.id)}
               >
                 Enable
               </Button>
             ) : (
-              <Button 
-                variant="contained" 
-                color="primary" 
+              <Button
+                variant="contained"
+                color="primary"
                 onClick={() => handleDisable(params.row.id)}
               >
                 Disable
@@ -139,12 +139,16 @@ export default function UserList() {
       headerName: "Action",
       width: 150,
       renderCell: (params) => (
-        <>
+        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
           <Link to={"/user/" + params.row.id}>
             <button className="userListEdit">Edit</button>
           </Link>
-          <DeleteOutlineIcon className="userListDelete" onClick={() => handleClickOpen(params.row.id)} />
-        </>
+          <DeleteOutlineIcon
+            className="userListDelete"
+            onClick={() => handleClickOpen(params.row.id)}
+            style={{ marginLeft: '10px' }} // Adjust margin if needed
+          />
+        </div>
       )
     });
 
@@ -169,7 +173,7 @@ export default function UserList() {
           <Tab label="Admin" value="admin" />
         </Tabs>
         <Link to="/newUser">
-            <button className="userAddButton">Create</button>
+          <button className="userAddButton">Create</button>
         </Link>
       </Box>
 
@@ -187,7 +191,7 @@ export default function UserList() {
           getRowId={(r) => r.id}
         />
       )}
-      
+
       <Dialog
         open={open}
         onClose={handleClose}

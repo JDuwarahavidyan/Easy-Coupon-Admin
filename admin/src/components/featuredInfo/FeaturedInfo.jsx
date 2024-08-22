@@ -7,30 +7,30 @@ export default function FeaturedInfo() {
     <div className="featured">
       
       <div className="featuredItem">
-        <span className="featuredTitle">Revenue</span>
+        <span className="featuredTitle">Total Coupons Used</span>
         <div className="featuredMoneyContainer">
-          <span className="featuredMoney">$2,415</span>
+          <span className="featuredMoney">356</span>
           <span className="featuredMoneyRate">
             -11.4 <ArrowDownwardIcon  className="featuredIcon negative"/>
           </span>
         </div>
-        <span className="featuredSub">Compared to last month</span>
+        <span className="featuredSub">Previous Month</span>
       </div>
 
 
       <div className="featuredItem">
-        <span className="featuredTitle">Sales</span>
+        <span className="featuredTitle">Total Coupons Used</span>
         <div className="featuredMoneyContainer">
-          <span className="featuredMoney">$4,415</span>
+          <span className="featuredMoney">89</span>
           <span className="featuredMoneyRate">
             -1.4 <ArrowDownwardIcon className="featuredIcon negative"/>
           </span>
         </div>
-        <span className="featuredSub">Compared to last month</span>
+        <span className="featuredSub">Current Month</span>
       </div>
 
 
-      <div className="featuredItem">
+      {/* <div className="featuredItem">
         <span className="featuredTitle">Cost</span>
         <div className="featuredMoneyContainer">
           <span className="featuredMoney">$2,225</span>
@@ -39,7 +39,7 @@ export default function FeaturedInfo() {
           </span>
         </div>
         <span className="featuredSub">Compared to last month</span>
-      </div>
+      </div> */}
     </div>
   );
 }
