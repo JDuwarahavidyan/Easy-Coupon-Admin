@@ -27,39 +27,3 @@
       cursor: pointer;
       
   }
-
-  .customButton {
-    background: linear-gradient(90deg, #7591ff, #4769ff);
-    color: #fff;
-    padding: 8px 16px;
-    border-radius: 50px;
-    box-shadow: none;
-    text-transform: none;
-    border: none;
-    cursor: pointer;
-    transition: background 0.3s ease, box-shadow 0.3s ease;
-  }
-  
-  .customButton:hover {
-    background: linear-gradient(90deg, #bbc8ff, #829bff);
-    box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1);
-  }
-  
-  .disableButton {
-    background: linear-gradient(90deg, #ff97aa, #ff2c53);
-    color: #fff;
-    padding: 8px 16px;
-    border-radius: 50px;
-    box-shadow: none;
-    text-transform: none;
-    border: none;
-    cursor: pointer;
-    transition: background 0.3s ease, box-shadow 0.3s ease;
-  }
-  
-  .disableButton:hover {
-    background: linear-gradient(90deg, #ffbac5, #ffb0bf);
-    box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1);
-  }
-
-  

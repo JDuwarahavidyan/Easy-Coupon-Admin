@@ -81,40 +81,40 @@ export default function UserList() {
   const getColumns = () => {
     const baseColumns = [
       { field: "id", headerName: "ID", width: 300 },
-      { 
-        field: "userName", 
-        headerName: "User Name", 
-        width: 200, 
+      {
+        field: "userName",
+        headerName: "User Name",
+        width: 200,
         renderCell: (params) => (
           <div className="userListUser">
-            <Avatar className="userListImg" src={params.row.avatar || "https://www.pngkey.com/png/full/114-1149878_setting-user-avatar-in-specific-size-without-breaking.png"} alt=""/>
+            <Avatar className="userListImg" src={params.row.avatar || "https://www.pngkey.com/png/full/114-1149878_setting-user-avatar-in-specific-size-without-breaking.png"} alt="" />
             {params.row.userName}
           </div>
         )
       },
       { field: "fullName", headerName: "Full Name", width: 200 }, // New fullName column
       { field: "email", headerName: "Email", width: 230 },
-      { 
-        field: "role", 
-        headerName: "Role", 
-        width: 150 
+      {
+        field: "role",
+        headerName: "Role",
+        width: 150
       }, // Role column before status
-      { 
-        field: "status", 
-        headerName: "Status", 
-        width: 150, 
+      {
+        field: "status",
+        headerName: "Status",
+        width: 150,
         renderCell: (params) => (
           <div>
             {params.row.disabled ? (
-              <Button 
-                className="customButton"
+              <Button
+               class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-0.0001 px-5 rounded"
                 onClick={() => handleEnable(params.row.id)}
               >
                 Enable
               </Button>
             ) : (
-              <Button 
-                className="disableButton"
+              <Button
+                class="bg-red-500 hover:bg-red-700 text-white font-bold py-0.0001 px-5 rounded"
                 onClick={() => handleDisable(params.row.id)}
               >
                 Disable
@@ -167,13 +167,22 @@ export default function UserList() {
           <Tab label="Admin" value="admin" />
         </Tabs>
         <Button
-        variant="contained"
-        color="primary"
-        onClick={() => {/* handle create user */}}
-        sx={{ ml: 10 }}  // Adds margin to the left of the button
-      >
-        Create New User
-      </Button>
+          variant="contained"
+          onClick={() => {/* handle create user */ }}
+          style={{
+            marginLeft: '-50px',    // Negative margin to move left beyond container
+            minWidth: '40px',
+            minHeight: '40px',
+            padding: '8px',
+            borderRadius: '20%',
+            fontSize: '0.75rem',
+            backgroundColor: '#4caf50',
+            color: '#ffffff',
+          }}
+        >
+          Create New User
+        </Button>
+
       </Box>
 
       {loading ? (
@@ -190,7 +199,7 @@ export default function UserList() {
           getRowId={(r) => r.id}
         />
       )}
-      
+
       <Dialog
         open={open}
         onClose={handleClose}
