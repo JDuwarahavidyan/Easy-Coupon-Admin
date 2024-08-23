@@ -16,13 +16,18 @@ import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
 import Box from '@mui/material/Box';
 import CircularProgress from '@mui/material/CircularProgress';
+import TextField from '@mui/material/TextField';
+import SearchIcon from '@mui/icons-material/Search';
+import InputAdornment from '@mui/material/InputAdornment';
 
 export default function UserList() {
   const { users, dispatch } = useContext(UserContext);
   const [open, setOpen] = useState(false);
   const [selectedUserId, setSelectedUserId] = useState(null);
   const [roleFilter, setRoleFilter] = useState('all');
+  const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(true);
+  const [dialogType, setDialogType] = useState(null); // State to track the type of dialog (delete, enable, disable)
 
   useEffect(() => {
     fetchUsers();  // eslint-disable-next-line
@@ -34,44 +39,48 @@ export default function UserList() {
     setLoading(false);
   };
 
-  const handleClickOpen = (id) => {
+  const handleClickOpen = (id, type) => {
     setSelectedUserId(id);
+    setDialogType(type); // Set the type of dialog (delete, enable, disable)
     setOpen(true);
   };
 
   const handleClose = () => {
     setOpen(false);
     setSelectedUserId(null);
+    setDialogType(null);
   };
 
   const handleDelete = async () => {
-    await deleteUser(selectedUserId, dispatch);
     handleClose();
+    setLoading(true);
+    await deleteUser(selectedUserId, dispatch);
     fetchUsers(); // Re-fetch users after deletion
+    
+  };
+
+  const handleEnable = async () => {
+    handleClose();
+    setLoading(true);
+    await enableUser(selectedUserId, dispatch);
+    updateUserStatus(selectedUserId, false);
+    setLoading(false);
+  };
+
+  const handleDisable = async () => {
+    handleClose();
+    setLoading(true);
+    await disableUser(selectedUserId, dispatch);
+    updateUserStatus(selectedUserId, true);
+    setLoading(false);
+
   };
 
   const handleTabChange = (event, newValue) => {
     setRoleFilter(newValue);
   };
 
-  const handleEnable = async (id) => {
-    setLoading(true);
-    await enableUser(id, dispatch);
-    // Update the user in the local state
-    updateUserStatus(id, false);
-    setLoading(false);
-  };
-
-  const handleDisable = async (id) => {
-    setLoading(true);
-    await disableUser(id, dispatch);
-    // Update the user in the local state
-    updateUserStatus(id, true);
-    setLoading(false);
-  };
-
   const updateUserStatus = (id, disabled) => {
-    // Find the user by id and update their status in the local state
     const updatedUsers = users.map(user =>
       user.id === id ? { ...user, disabled } : user
     );
@@ -92,32 +101,36 @@ export default function UserList() {
           </div>
         )
       },
-      { field: "fullName", headerName: "Full Name", width: 200 }, // New fullName column
+      { field: "fullName", headerName: "Full Name", width: 200 },
       { field: "email", headerName: "Email", width: 230 },
-      {
-        field: "role",
-        headerName: "Role",
-        width: 150
-      }, // Role column before status
-      {
-        field: "status",
-        headerName: "Status",
-        width: 150,
+
+      { 
+        field: "role", 
+        headerName: "Role", 
+        width: 150 
+      },
+      { 
+        field: "status", 
+        headerName: "Status", 
+        width: 150, 
+
         renderCell: (params) => (
           <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
             {params.row.disabled ? (
-              <Button
-                variant="contained"
-                color="secondary"
-                onClick={() => handleEnable(params.row.id)}
+
+              <Button 
+                variant="contained" 
+                color="secondary" 
+                onClick={() => handleClickOpen(params.row.id, 'enable')}
               >
                 Enable
               </Button>
             ) : (
-              <Button
-                variant="contained"
-                color="primary"
-                onClick={() => handleDisable(params.row.id)}
+
+              <Button 
+                variant="contained" 
+                color="primary" 
+                onClick={() => handleClickOpen(params.row.id, 'disable')}
               >
                 Disable
               </Button>
@@ -133,7 +146,6 @@ export default function UserList() {
       baseColumns.push({ field: "canteenCount", headerName: "Count", width: 115 });
     }
 
-    // Add the action column
     baseColumns.push({
       field: "action",
       headerName: "Action",
@@ -143,12 +155,10 @@ export default function UserList() {
           <Link to={"/user/" + params.row.id}>
             <button className="userListEdit">Edit</button>
           </Link>
-          <DeleteOutlineIcon
-            className="userListDelete"
-            onClick={() => handleClickOpen(params.row.id)}
-            style={{ marginLeft: '10px' }} // Adjust margin if needed
-          />
-        </div>
+
+          <DeleteOutlineIcon className="userListDelete" onClick={() => handleClickOpen(params.row.id, 'delete')} />
+        </>
+
       )
     });
 
@@ -157,11 +167,19 @@ export default function UserList() {
 
   const columns = getColumns();
 
-  const filteredUsers = roleFilter === 'all'
-    ? users
-    : roleFilter === 'canteen'
-      ? users.filter(user => user.role === 'canteena' || user.role === 'canteenb')
-      : users.filter(user => user.role === roleFilter);
+  const filteredUsers = users.filter(user => {
+    const matchesRole = roleFilter === 'all'
+      ? true
+      : roleFilter === 'canteen'
+        ? user.role === 'canteena' || user.role === 'canteenb'
+        : user.role === roleFilter;
+
+    const matchesSearch = user.userName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                          user.fullName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                          user.email.toLowerCase().includes(searchQuery.toLowerCase());
+
+    return matchesRole && matchesSearch;
+  });
 
   return (
     <div className="userList">
@@ -172,9 +190,29 @@ export default function UserList() {
           <Tab label="Canteen" value="canteen" />
           <Tab label="Admin" value="admin" />
         </Tabs>
-        <Link to="/newUser">
-          <button className="userAddButton">Create</button>
-        </Link>
+
+        <Box display="flex" alignItems="center">
+          <TextField
+            variant="outlined"
+            placeholder="Search users..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  <SearchIcon />
+                </InputAdornment>
+              ),
+            }}
+            style={{ marginRight: '16px', width: '300px' }} // Adjust width and margin as needed
+          />
+          <Link to="/newUser">
+            <Button variant="contained" color="primary">
+              Create
+            </Button>
+          </Link>
+        </Box>
+
       </Box>
 
       {loading ? (
@@ -187,6 +225,7 @@ export default function UserList() {
           disableSelectionOnClick
           columns={columns}
           pageSize={10}
+          pageSizeOptions={[10, 25, 50, 100]} 
           checkboxSelection
           getRowId={(r) => r.id}
         />
@@ -198,18 +237,29 @@ export default function UserList() {
         aria-labelledby="alert-dialog-title"
         aria-describedby="alert-dialog-description"
       >
-        <DialogTitle id="alert-dialog-title">{"Confirm Deletion"}</DialogTitle>
+        <DialogTitle id="alert-dialog-title">
+          {dialogType === 'delete' ? "Confirm Deletion" : dialogType === 'enable' ? "Confirm Enable" : "Confirm Disable"}
+        </DialogTitle>
         <DialogContent>
           <DialogContentText id="alert-dialog-description">
-            Are you sure you want to delete this user?
+            {dialogType === 'delete' 
+              ? "Are you sure you want to delete this user?"
+              : dialogType === 'enable'
+              ? "Are you sure you want to enable this user?"
+              : "Are you sure you want to disable this user?"
+            }
           </DialogContentText>
         </DialogContent>
         <DialogActions>
           <Button onClick={handleClose} color="primary">
             Cancel
           </Button>
-          <Button onClick={handleDelete} color="primary" autoFocus>
-            Delete
+          <Button 
+            onClick={dialogType === 'delete' ? handleDelete : dialogType === 'enable' ? handleEnable : handleDisable} 
+            color="primary" 
+            autoFocus
+          >
+            {dialogType === 'delete' ? "Delete" : dialogType === 'enable' ? "Enable" : "Disable"}
           </Button>
         </DialogActions>
       </Dialog>
