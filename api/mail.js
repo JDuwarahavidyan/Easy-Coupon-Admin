@@ -1,35 +1,32 @@
 const nodemailer = require('nodemailer');
-require('dotenv').config(); // Load environment variables
+require('dotenv').config();
 
 // Set up Nodemailer transport configuration
 const transporter = nodemailer.createTransport({
   service: 'gmail',
   auth: {
-    user: process.env.EMAIL_USER, // Your Gmail address
-    pass: process.env.EMAIL_PASS  // Your app password
+    user: process.env.EMAIL_USER, 
+    pass: process.env.EMAIL_PASS  
   }
 });
 
-// Helper function to capitalize the first letter of the user's name
-const capitalizeFirstLetter = (string) => {
-  return string.charAt(0).toUpperCase() + string.slice(1).toLowerCase();
-};
+// Function to send an email with the provided details
+const sendEmail = async (to, subject, fullName, customMessage) => {
+  const message = `
+<p>Dear ${fullName},</p>
+<p>${customMessage}</p>
+<p><strong>Best Regards,</strong><br>
+Easy Coupon Team</p>
+<p style="font-size: smaller; color: grey; font-style: italic;">
+This is an automatically generated email, please do not reply.
+</p>
+`;
 
-// Common function to send an email with a flexible message body
-const sendEmail = async (to, subject, userName, message) => {
-  const formattedUserName = capitalizeFirstLetter(userName);
   const mailOptions = {
     from: process.env.EMAIL_USER,
     to,
     subject,
-    text: `Dear ${formattedUserName},
-
-${message}
-
-Thank you.
-
-Best Regards,
-Easy Coupon Team.`
+    html: message  // Use 'html' instead of 'text' to send HTML formatted email
   };
 
   try {

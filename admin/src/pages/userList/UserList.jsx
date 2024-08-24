@@ -56,7 +56,7 @@ export default function UserList() {
     setLoading(true);
     await deleteUser(selectedUserId, dispatch);
     fetchUsers(); // Re-fetch users after deletion
-    
+    setLoading(false);
   };
 
   const handleEnable = async () => {
@@ -73,7 +73,6 @@ export default function UserList() {
     await disableUser(selectedUserId, dispatch);
     updateUserStatus(selectedUserId, true);
     setLoading(false);
-
   };
 
   const handleTabChange = (event, newValue) => {
@@ -104,32 +103,34 @@ export default function UserList() {
       { field: "fullName", headerName: "Full Name", width: 200 },
       { field: "email", headerName: "Email", width: 230 },
 
-      { 
-        field: "role", 
-        headerName: "Role", 
-        width: 150 
+      {
+        field: "role",
+        headerName: "Role",
+        width: 150
       },
-      { 
-        field: "status", 
-        headerName: "Status", 
-        width: 150, 
+      {
+        field: "status",
+        headerName: "Status",
+        width: 150,
 
         renderCell: (params) => (
           <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
             {params.row.disabled ? (
 
-              <Button 
-                variant="contained" 
-                color="secondary" 
+              <Button
+                variant="contained"
+                color="secondary"
+
                 onClick={() => handleClickOpen(params.row.id, 'enable')}
               >
                 Enable
               </Button>
             ) : (
 
-              <Button 
-                variant="contained" 
-                color="primary" 
+              <Button
+                variant="contained"
+                color="primary"
+
                 onClick={() => handleClickOpen(params.row.id, 'disable')}
               >
                 Disable
@@ -153,7 +154,9 @@ export default function UserList() {
       renderCell: (params) => (
         <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
           <Link to={"/user/" + params.row.id}>
-            <button className="userListEdit">Edit</button>
+            <Button variant="outlined" color="primary" className="userListEdit">
+              Edit
+            </Button>
           </Link>
 
           <DeleteOutlineIcon className="userListDelete" onClick={() => handleClickOpen(params.row.id, 'delete')} />
@@ -174,9 +177,10 @@ export default function UserList() {
         ? user.role === 'canteena' || user.role === 'canteenb'
         : user.role === roleFilter;
 
-    const matchesSearch = user.userName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                          user.fullName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                          user.email.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesSearch =
+      (String(user.userName).toLowerCase().includes(searchQuery.toLowerCase())) ||
+      (user.fullName?.toLowerCase() || "").includes(searchQuery.toLowerCase()) ||
+      (user.email?.toLowerCase() || "").includes(searchQuery.toLowerCase());
 
     return matchesRole && matchesSearch;
   });
@@ -225,7 +229,7 @@ export default function UserList() {
           disableSelectionOnClick
           columns={columns}
           pageSize={10}
-          pageSizeOptions={[10, 25, 50, 100]} 
+          pageSizeOptions={[10, 25, 50, 100]}
           checkboxSelection
           getRowId={(r) => r.id}
         />
@@ -242,7 +246,7 @@ export default function UserList() {
         </DialogTitle>
         <DialogContent>
           <DialogContentText id="alert-dialog-description">
-            {dialogType === 'delete' 
+            {dialogType === 'delete'
               ? "Are you sure you want to delete this user?"
               : dialogType === 'enable'
               ? "Are you sure you want to enable this user?"
@@ -254,9 +258,10 @@ export default function UserList() {
           <Button onClick={handleClose} color="primary">
             Cancel
           </Button>
-          <Button 
-            onClick={dialogType === 'delete' ? handleDelete : dialogType === 'enable' ? handleEnable : handleDisable} 
-            color="primary" 
+          <Button
+            onClick={dialogType === 'delete' ? handleDelete : dialogType === 'enable' ? handleEnable : handleDisable}
+            color="primary"
+            className="buttonStatus"
             autoFocus
           >
             {dialogType === 'delete' ? "Delete" : dialogType === 'enable' ? "Enable" : "Disable"}

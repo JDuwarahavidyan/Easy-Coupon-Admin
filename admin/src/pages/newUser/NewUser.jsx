@@ -16,19 +16,22 @@ import { createUser } from "../../context/userContext/apiCalls";
 import { UserContext } from "../../context/userContext/UserContext"; 
 import { useNavigate } from 'react-router-dom';
 import * as XLSX from 'xlsx'; // Import the xlsx library
+import DownloadIcon from '@mui/icons-material/Download'; // Import the download icon
 
 export default function NewUser() {
   const [user, setUser] = useState({
     userName: "",
     fullName: "",
     email: "",
-    role: "",
+    role: "student",
   });
   const [loadingSingle, setLoadingSingle] = useState(false); // Loading state for single user creation
   const [loadingBulk, setLoadingBulk] = useState(false); // Loading state for bulk user creation
   const [open, setOpen] = useState(false);
   const [dialogMessage, setDialogMessage] = useState("");
   const [bulkUsers, setBulkUsers] = useState([]); // State to store bulk users data
+  const [isSuccessful, setIsSuccessful] = useState(false);
+
   const navigate = useNavigate();
   const { dispatch } = useContext(UserContext);
 
@@ -42,22 +45,34 @@ export default function NewUser() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setLoadingSingle(true); // Start loading for single user creation
-    try {
-      await createUser(user, dispatch);
-      setDialogMessage("User registered successfully!");
-    } catch (err) {
-      // Set the error message returned from the backend
-      setDialogMessage(err.response?.data?.error || "Failed to register user. Please try again.");
-    } finally {
-      setOpen(true);
-      setLoadingSingle(false); // Stop loading for single user creation
+
+    // Check if any of the fields are empty
+    if (!user.userName || !user.fullName || !user.email || !user.role) {
+        setDialogMessage("All fields are required.");
+        setIsSuccessful(false);
+        setOpen(true);
+        return;
     }
-  };
+
+    setLoadingSingle(true);
+    try {
+        await createUser(user, dispatch);
+        setDialogMessage("User registered successfully!");
+        setIsSuccessful(true);  // Set success flag to true
+    } catch (err) {
+        setDialogMessage(err.message || "Failed to register user. Please try again.");
+        setIsSuccessful(false); // Ensure success flag is false on error
+    } finally {
+        setOpen(true);
+        setLoadingSingle(false);
+    }
+};
 
   const handleClose = () => {
     setOpen(false);
-    navigate('/users');
+    if (isSuccessful) {
+        navigate('/users');
+    }
   };
 
   const handleFileUpload = (e) => {
@@ -78,24 +93,33 @@ export default function NewUser() {
   };
 
   const handleBulkCreate = async () => {
-    setLoadingBulk(true); // Start loading for bulk user creation
-    let errorOccurred = false;
+    setLoadingBulk(true);
+    let errorMessages = [];
+
     for (const row of bulkUsers) {
-      const newUser = {
-        userName: row['Username'],
-        fullName: row['Full Name'],
-        email: row['Email'],
-        role: row['Role'],
-      };
-      try {
-        await createUser(newUser, dispatch);
-      } catch (err) {
-        errorOccurred = true;
-        console.error("Failed to create user:", newUser, err);
-      }
+        const newUser = {
+            userName: row['Username'],
+            fullName: row['Full Name'],
+            email: row['Email'],
+            role: row['Role'],
+        };
+
+        try {
+            await createUser(newUser, dispatch);
+        } catch (err) {
+            const errorMessage = err.message
+                ? `User ${newUser.userName}: ${err.message}`
+                : `Failed to create user: ${newUser.userName}.`;
+            errorMessages.push(errorMessage);
+        }
     }
-    setLoadingBulk(false); // Stop loading for bulk user creation
-    setDialogMessage(errorOccurred ? "Some users failed to be created. Check the console for more details." : "Bulk user creation process completed!");
+
+    setLoadingBulk(false);
+    setDialogMessage(
+        errorMessages.length > 0
+            ? errorMessages // Store as an array of messages
+            : ["Bulk user creation process completed successfully!"]
+    );
     setOpen(true);
   };
 
@@ -162,13 +186,20 @@ export default function NewUser() {
         </div>
       
         <div className="newUserActions">
-          <button className="newUserButton" type="submit" disabled={loadingSingle || loadingBulk}>
-            {loadingSingle ? <CircularProgress size={24} /> : "Create"}
-          </button>
+          <Button
+            variant="contained"
+            className="newUserButton"
+            color="primary"
+            type="submit"
+            disabled={loadingSingle || loadingBulk}
+            startIcon={loadingSingle && <CircularProgress size={24} />}
+          >
+            {loadingSingle ? "Creating..." : "Create"}
+          </Button>
 
           <div className="fileUpload">
             <div className="fileLable">
-              <label>Bulk Creation (.xlsx & .xls only)</label>
+              <label>Bulk Creation (.xlsx or .xls only)</label>
               <input
                 className="uploadExcel"
                 type="file"
@@ -177,14 +208,28 @@ export default function NewUser() {
               />
             </div>
             
-            <button 
-              className="newUserButton" 
-              type="button" 
+            <Button 
+              variant="contained"
+              color="primary"
               onClick={handleBulkCreate} 
               disabled={loadingBulk || bulkUsers.length === 0}
+              startIcon={loadingBulk && <CircularProgress size={24} />}
             >
-              {loadingBulk ? <CircularProgress size={24} /> : "Bulk Create Users"}
-            </button>
+              {loadingBulk ? "Creating..." : "Bulk Create Users"}
+            </Button>
+          </div>
+
+          {/* Download Sample Document Section */}
+          <div className="downloadSample">
+            <Button
+              variant="outlined"
+              color="primary"
+              startIcon={<DownloadIcon />}
+              href="/Bulk User Creation Format.xlsx" // Link to the sample document
+              download
+            >
+              Download Sample Document
+            </Button>
           </div>
         </div>
       </form>
@@ -198,7 +243,11 @@ export default function NewUser() {
         <DialogTitle id="alert-dialog-title">{"User Registration"}</DialogTitle>
         <DialogContent>
           <DialogContentText id="alert-dialog-description">
-            {dialogMessage}
+            {Array.isArray(dialogMessage) 
+              ? dialogMessage.map((msg, index) => (
+                <div key={index}>{msg}</div> // Render each message in a separate div
+              ))
+              : dialogMessage}
           </DialogContentText>
         </DialogContent>
         <DialogActions>
