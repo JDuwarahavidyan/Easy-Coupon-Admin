@@ -22,7 +22,7 @@ export default function NewUser() {
     userName: "",
     fullName: "",
     email: "",
-    role: "",
+    role: "student",
   });
   const [loadingSingle, setLoadingSingle] = useState(false); // Loading state for single user creation
   const [loadingBulk, setLoadingBulk] = useState(false); // Loading state for bulk user creation
@@ -42,8 +42,17 @@ export default function NewUser() {
     }));
   };
 
-  const handleSubmit = async (e) => {
+const handleSubmit = async (e) => {
     e.preventDefault();
+
+    // Check if any of the fields are empty
+    if (!user.userName || !user.fullName || !user.email || !user.role) {
+        setDialogMessage("All fields are required.");
+        setIsSuccessful(false);
+        setOpen(true);
+        return;
+    }
+
     setLoadingSingle(true);
     try {
         await createUser(user, dispatch);
@@ -57,6 +66,7 @@ export default function NewUser() {
         setLoadingSingle(false);
     }
 };
+
 
 const handleClose = () => {
   setOpen(false);
@@ -86,6 +96,7 @@ const handleClose = () => {
   const handleBulkCreate = async () => {
     setLoadingBulk(true);
     let errorMessages = [];
+
     for (const row of bulkUsers) {
         const newUser = {
             userName: row['Username'],
@@ -93,20 +104,28 @@ const handleClose = () => {
             email: row['Email'],
             role: row['Role'],
         };
+
         try {
             await createUser(newUser, dispatch);
         } catch (err) {
-            const errorMessage = err.message || `Failed to create user: ${newUser.userName}.`;
+            const errorMessage = err.message
+                ? `User ${newUser.userName}: ${err.message}`
+                : `Failed to create user: ${newUser.userName}.`;
             errorMessages.push(errorMessage);
         }
     }
-  
+
     setLoadingBulk(false);
-    setDialogMessage(errorMessages.length > 0 
-        ? `Some users failed to be created:\n${errorMessages.join("\n")}`
-        : "Bulk user creation process completed successfully!");
+    setDialogMessage(
+        errorMessages.length > 0
+            ? errorMessages // Store as an array of messages
+            : ["Bulk user creation process completed successfully!"]
+    );
     setOpen(true);
 };
+
+
+  
   
 
   return (
@@ -178,7 +197,7 @@ const handleClose = () => {
 
           <div className="fileUpload">
             <div className="fileLable">
-              <label>Bulk Creation (.xlsx & .xls only)</label>
+              <label>Bulk Creation (.xlsx or .xls only)</label>
               <input
                 className="uploadExcel"
                 type="file"
@@ -207,9 +226,14 @@ const handleClose = () => {
       >
         <DialogTitle id="alert-dialog-title">{"User Registration"}</DialogTitle>
         <DialogContent>
-          <DialogContentText id="alert-dialog-description">
-            {dialogMessage}
-          </DialogContentText>
+        <DialogContentText id="alert-dialog-description">
+    {Array.isArray(dialogMessage) 
+        ? dialogMessage.map((msg, index) => (
+              <div key={index}>{msg}</div> // Render each message in a separate div
+          ))
+        : dialogMessage}
+</DialogContentText>
+
         </DialogContent>
         <DialogActions>
           <Button onClick={handleClose} color="primary" autoFocus>
