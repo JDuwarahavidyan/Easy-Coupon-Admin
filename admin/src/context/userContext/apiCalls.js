@@ -37,19 +37,23 @@ export const getUsers = async (dispatch) => {
   }
 };
 // CREATE User
-export const createUser = async (User, dispatch) => {
-    dispatch(createUserStart());
-    try {
-        const res = await axios.post("/auth/register", User, {
-        headers: {
-          authorization: "Bearer " + JSON.parse(localStorage.getItem("user")).customToken,
-        },
+export const createUser = async (user, dispatch) => {
+  dispatch(createUserStart());
+  try {
+      const res = await axios.post("/auth/register", user, {
+          headers: {
+              authorization: "Bearer " + JSON.parse(localStorage.getItem("user")).customToken,
+          },
       });
       dispatch(createUserSuccess(res.data));
-    } catch (err) {
-      dispatch(createUserFailure(err.response.data.error ));
-    }
+      return res.data; // return the successful response data
+  } catch (err) {
+      const errorMsg = err.response?.data?.error || "Something went wrong!";
+      dispatch(createUserFailure(errorMsg));
+      throw new Error(errorMsg); // re-throw the error with the message
+  }
 };
+
 
 // UPDATE User
 export const updateUser = async (id, User, dispatch) => {

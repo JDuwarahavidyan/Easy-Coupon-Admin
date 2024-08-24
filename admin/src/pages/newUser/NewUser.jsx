@@ -29,6 +29,8 @@ export default function NewUser() {
   const [open, setOpen] = useState(false);
   const [dialogMessage, setDialogMessage] = useState("");
   const [bulkUsers, setBulkUsers] = useState([]); // State to store bulk users data
+  const [isSuccessful, setIsSuccessful] = useState(false);
+
   const navigate = useNavigate();
   const { dispatch } = useContext(UserContext);
 
@@ -42,23 +44,27 @@ export default function NewUser() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setLoadingSingle(true); // Start loading for single user creation
+    setLoadingSingle(true);
     try {
-      await createUser(user, dispatch);
-      setDialogMessage("User registered successfully!");
+        await createUser(user, dispatch);
+        setDialogMessage("User registered successfully!");
+        setIsSuccessful(true);  // Set success flag to true
     } catch (err) {
-      // Set the error message returned from the backend
-      setDialogMessage(err.response?.data?.error || "Failed to register user. Please try again.");
+        setDialogMessage(err.message || "Failed to register user. Please try again.");
+        setIsSuccessful(false); // Ensure success flag is false on error
     } finally {
-      setOpen(true);
-      setLoadingSingle(false); // Stop loading for single user creation
+        setOpen(true);
+        setLoadingSingle(false);
     }
-  };
+};
 
-  const handleClose = () => {
-    setOpen(false);
-    navigate('/users');
-  };
+const handleClose = () => {
+  setOpen(false);
+  if (isSuccessful) {
+      navigate('/users');
+  }
+};
+
 
   const handleFileUpload = (e) => {
     const file = e.target.files[0];
@@ -78,26 +84,30 @@ export default function NewUser() {
   };
 
   const handleBulkCreate = async () => {
-    setLoadingBulk(true); // Start loading for bulk user creation
-    let errorOccurred = false;
+    setLoadingBulk(true);
+    let errorMessages = [];
     for (const row of bulkUsers) {
-      const newUser = {
-        userName: row['Username'],
-        fullName: row['Full Name'],
-        email: row['Email'],
-        role: row['Role'],
-      };
-      try {
-        await createUser(newUser, dispatch);
-      } catch (err) {
-        errorOccurred = true;
-        console.error("Failed to create user:", newUser, err);
-      }
+        const newUser = {
+            userName: row['Username'],
+            fullName: row['Full Name'],
+            email: row['Email'],
+            role: row['Role'],
+        };
+        try {
+            await createUser(newUser, dispatch);
+        } catch (err) {
+            const errorMessage = err.message || `Failed to create user: ${newUser.userName}.`;
+            errorMessages.push(errorMessage);
+        }
     }
-    setLoadingBulk(false); // Stop loading for bulk user creation
-    setDialogMessage(errorOccurred ? "Some users failed to be created. Check the console for more details." : "Bulk user creation process completed!");
+  
+    setLoadingBulk(false);
+    setDialogMessage(errorMessages.length > 0 
+        ? `Some users failed to be created:\n${errorMessages.join("\n")}`
+        : "Bulk user creation process completed successfully!");
     setOpen(true);
-  };
+};
+  
 
   return (
     <div className="newUser">

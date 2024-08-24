@@ -167,13 +167,15 @@ export default function UserList() {
       : roleFilter === 'canteen'
         ? user.role === 'canteena' || user.role === 'canteenb'
         : user.role === roleFilter;
-
-    const matchesSearch = user.userName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                          user.fullName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                          user.email.toLowerCase().includes(searchQuery.toLowerCase());
-
+  
+    const matchesSearch = 
+      (user.userName?.toLowerCase() || "").includes(searchQuery.toLowerCase()) ||
+      (user.fullName?.toLowerCase() || "").includes(searchQuery.toLowerCase()) ||
+      (user.email?.toLowerCase() || "").includes(searchQuery.toLowerCase());
+  
     return matchesRole && matchesSearch;
   });
+  
 
   return (
     <div className="userList">
