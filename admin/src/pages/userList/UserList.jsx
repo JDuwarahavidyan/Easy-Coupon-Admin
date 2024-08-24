@@ -102,6 +102,7 @@ export default function UserList() {
       },
       { field: "fullName", headerName: "Full Name", width: 200 },
       { field: "email", headerName: "Email", width: 230 },
+
       {
         field: "role",
         headerName: "Role",
@@ -111,20 +112,25 @@ export default function UserList() {
         field: "status",
         headerName: "Status",
         width: 150,
+
         renderCell: (params) => (
-          <div>
+          <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
             {params.row.disabled ? (
+
               <Button
                 variant="contained"
                 color="secondary"
+
                 onClick={() => handleClickOpen(params.row.id, 'enable')}
               >
                 Enable
               </Button>
             ) : (
+
               <Button
                 variant="contained"
                 color="primary"
+
                 onClick={() => handleClickOpen(params.row.id, 'disable')}
               >
                 Disable
@@ -146,14 +152,16 @@ export default function UserList() {
       headerName: "Action",
       width: 150,
       renderCell: (params) => (
-        <>
+        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
           <Link to={"/user/" + params.row.id}>
             <Button variant="outlined" color="primary" className="userListEdit">
               Edit
             </Button>
           </Link>
+
           <DeleteOutlineIcon className="userListDelete" onClick={() => handleClickOpen(params.row.id, 'delete')} />
         </>
+
       )
     });
 
@@ -186,6 +194,7 @@ export default function UserList() {
           <Tab label="Canteen" value="canteen" />
           <Tab label="Admin" value="admin" />
         </Tabs>
+
         <Box display="flex" alignItems="center">
           <TextField
             variant="outlined"
@@ -207,6 +216,7 @@ export default function UserList() {
             </Button>
           </Link>
         </Box>
+
       </Box>
 
       {loading ? (
