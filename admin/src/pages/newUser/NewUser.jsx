@@ -16,6 +16,7 @@ import { createUser } from "../../context/userContext/apiCalls";
 import { UserContext } from "../../context/userContext/UserContext"; 
 import { useNavigate } from 'react-router-dom';
 import * as XLSX from 'xlsx'; // Import the xlsx library
+import DownloadIcon from '@mui/icons-material/Download'; // Import the download icon
 
 export default function NewUser() {
   const [user, setUser] = useState({
@@ -42,7 +43,7 @@ export default function NewUser() {
     }));
   };
 
-const handleSubmit = async (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     // Check if any of the fields are empty
@@ -67,14 +68,12 @@ const handleSubmit = async (e) => {
     }
 };
 
-
-const handleClose = () => {
-  setOpen(false);
-  if (isSuccessful) {
-      navigate('/users');
-  }
-};
-
+  const handleClose = () => {
+    setOpen(false);
+    if (isSuccessful) {
+        navigate('/users');
+    }
+  };
 
   const handleFileUpload = (e) => {
     const file = e.target.files[0];
@@ -122,11 +121,7 @@ const handleClose = () => {
             : ["Bulk user creation process completed successfully!"]
     );
     setOpen(true);
-};
-
-
-  
-  
+  };
 
   return (
     <div className="newUser">
@@ -191,9 +186,16 @@ const handleClose = () => {
         </div>
       
         <div className="newUserActions">
-          <button className="newUserButton" type="submit" disabled={loadingSingle || loadingBulk}>
-            {loadingSingle ? <CircularProgress size={24} /> : "Create"}
-          </button>
+          <Button
+            variant="contained"
+            className="newUserButton"
+            color="primary"
+            type="submit"
+            disabled={loadingSingle || loadingBulk}
+            startIcon={loadingSingle && <CircularProgress size={24} />}
+          >
+            {loadingSingle ? "Creating..." : "Create"}
+          </Button>
 
           <div className="fileUpload">
             <div className="fileLable">
@@ -206,14 +208,28 @@ const handleClose = () => {
               />
             </div>
             
-            <button 
-              className="newUserButton" 
-              type="button" 
+            <Button 
+              variant="contained"
+              color="primary"
               onClick={handleBulkCreate} 
               disabled={loadingBulk || bulkUsers.length === 0}
+              startIcon={loadingBulk && <CircularProgress size={24} />}
             >
-              {loadingBulk ? <CircularProgress size={24} /> : "Bulk Create Users"}
-            </button>
+              {loadingBulk ? "Creating..." : "Bulk Create Users"}
+            </Button>
+          </div>
+
+          {/* Download Sample Document Section */}
+          <div className="downloadSample">
+            <Button
+              variant="outlined"
+              color="primary"
+              startIcon={<DownloadIcon />}
+              href="/Bulk User Creation Format.xlsx" // Link to the sample document
+              download
+            >
+              Download Sample Document
+            </Button>
           </div>
         </div>
       </form>
@@ -226,14 +242,13 @@ const handleClose = () => {
       >
         <DialogTitle id="alert-dialog-title">{"User Registration"}</DialogTitle>
         <DialogContent>
-        <DialogContentText id="alert-dialog-description">
-    {Array.isArray(dialogMessage) 
-        ? dialogMessage.map((msg, index) => (
-              <div key={index}>{msg}</div> // Render each message in a separate div
-          ))
-        : dialogMessage}
-</DialogContentText>
-
+          <DialogContentText id="alert-dialog-description">
+            {Array.isArray(dialogMessage) 
+              ? dialogMessage.map((msg, index) => (
+                <div key={index}>{msg}</div> // Render each message in a separate div
+              ))
+              : dialogMessage}
+          </DialogContentText>
         </DialogContent>
         <DialogActions>
           <Button onClick={handleClose} color="primary" autoFocus>

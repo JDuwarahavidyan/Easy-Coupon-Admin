@@ -169,12 +169,13 @@ export default function UserList() {
         : user.role === roleFilter;
   
     const matchesSearch = 
-      (user.userName?.toLowerCase() || "").includes(searchQuery.toLowerCase()) ||
+      (String(user.userName).toLowerCase().includes(searchQuery.toLowerCase())) ||
       (user.fullName?.toLowerCase() || "").includes(searchQuery.toLowerCase()) ||
       (user.email?.toLowerCase() || "").includes(searchQuery.toLowerCase());
   
     return matchesRole && matchesSearch;
   });
+  
   
 
   return (
