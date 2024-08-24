@@ -1,7 +1,7 @@
 .topbar{
     width: 100%;
     height: 75px;
-    background-color: #789461;
+    background-color: #e6f1fd;
     position: sticky;
     top: 0; /*to fix the top while scrolling*/
     z-index: 999; /*other components won't overlap with this*/

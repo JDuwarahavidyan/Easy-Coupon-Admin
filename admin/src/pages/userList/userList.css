@@ -1,6 +1,6 @@
 .userList {
     flex: 6;
-    height: 84vh;
+    height: 83.5vh;
   }
   
   .userListUser {
@@ -27,3 +27,12 @@
       cursor: pointer;
       
   }
+.searchInput{
+   margin-top: 5px !important;
+   width: 200px !important;
+   height: auto;
+}
+
+.createButton{
+  margin-right: 10px !important;
+}
