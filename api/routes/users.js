@@ -99,6 +99,7 @@ router.get("/stats", verifyAdmin, async (req, res) => {
   }
 });
 
+
 router.put("/disable/:id", verifyAdmin, async (req, res) => {
   try {
     const uid = req.params.id;
@@ -119,14 +120,19 @@ router.put("/disable/:id", verifyAdmin, async (req, res) => {
     const fullName = userDoc.data().fullName;
 
     // Send notification email
-    const message = "Your account has been suspended. Please contact the Administration for further information.";
-    await sendEmail(userEmail, 'Account Suspended', fullName, message);
+    await sendEmail(userEmail, 'Account Suspended', fullName, 
+`<p>We regret to inform you that your account has been <strong>suspended</strong>. If you believe this is a mistake or require further information, please contact the Administration at your earliest convenience.</p>
 
+<p><strong>Important:</strong> Do not attempt to access your account until this issue is resolved.</p>
+
+<p>Thank you for your understanding.</p>`);
+      
     res.status(200).json({ message: "User account has been disabled" });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
+
 
 // ENABLE USER ACCOUNT
 router.put("/enable/:id", verifyAdmin, async (req, res) => {
@@ -149,14 +155,21 @@ router.put("/enable/:id", verifyAdmin, async (req, res) => {
     const fullName = userDoc.data().fullName;
 
     // Send notification email
-    const message = "Your account has been enabled. If you did not request this, please contact the Administration.";
-    await sendEmail(userEmail, 'Account Enabled', fullName, message);
+    await sendEmail(userEmail, 'Account Enabled', fullName, 
+`<p>We are pleased to inform you that your account has been <strong>enabled</strong>. You may now log in and enjoy your meals with Easy Coupon.</p>
+
+<p><strong>Important:</strong> If you did not request this action, please contact the Administration immediately to secure your account.</p>
+
+<p>Thank you for your attention to this matter.</p>`);
+      
+      
 
     res.status(200).json({ message: "User account has been enabled" });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
+
 
 
 

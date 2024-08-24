@@ -1,5 +1,5 @@
 const nodemailer = require('nodemailer');
-require('dotenv').config(); 
+require('dotenv').config();
 
 // Set up Nodemailer transport configuration
 const transporter = nodemailer.createTransport({
@@ -10,20 +10,23 @@ const transporter = nodemailer.createTransport({
   }
 });
 
+// Function to send an email with the provided details
+const sendEmail = async (to, subject, fullName, customMessage) => {
+  const message = `
+<p>Dear ${fullName},</p>
+<p>${customMessage}</p>
+<p><strong>Best Regards,</strong><br>
+Easy Coupon Team</p>
+<p style="font-size: smaller; color: grey; font-style: italic;">
+This is an automatically generated email, please do not reply.
+</p>
+`;
 
-const sendEmail = async (to, subject, fullName, message) => {
   const mailOptions = {
     from: process.env.EMAIL_USER,
     to,
     subject,
-    text: `Dear ${fullName},
-
-${message}
-
-Thank you.
-
-Best Regards,
-Easy Coupon Team.`
+    html: message  // Use 'html' instead of 'text' to send HTML formatted email
   };
 
   try {
