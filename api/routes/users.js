@@ -116,11 +116,11 @@ router.put("/disable/:id", verifyAdmin, async (req, res) => {
     // Fetch user details from Firestore
     const userDoc = await admin.firestore().collection('users').doc(uid).get();
     const userEmail = userDoc.data().email;
-    const userName = userDoc.data().userName;
+    const fullName = userDoc.data().fullName;
 
     // Send notification email
     const message = "Your account has been suspended. Please contact the Administration for further information.";
-    await sendEmail(userEmail, 'Account Suspended', userName, message);
+    await sendEmail(userEmail, 'Account Suspended', fullName, message);
 
     res.status(200).json({ message: "User account has been disabled" });
   } catch (err) {
@@ -146,11 +146,11 @@ router.put("/enable/:id", verifyAdmin, async (req, res) => {
     // Fetch user details from Firestore
     const userDoc = await admin.firestore().collection('users').doc(uid).get();
     const userEmail = userDoc.data().email;
-    const userName = userDoc.data().userName;
+    const fullName = userDoc.data().fullName;
 
     // Send notification email
     const message = "Your account has been enabled. If you did not request this, please contact the Administration.";
-    await sendEmail(userEmail, 'Account Enabled', userName, message);
+    await sendEmail(userEmail, 'Account Enabled', fullName, message);
 
     res.status(200).json({ message: "User account has been enabled" });
   } catch (err) {
