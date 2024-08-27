@@ -10,6 +10,7 @@
 .chart {
   height: 400px; /* Set a specific height */
 }
+
 .loadingContainer {
   display: flex;
   justify-content: center;
