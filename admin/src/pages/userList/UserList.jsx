@@ -160,7 +160,7 @@ export default function UserList() {
           </Link>
 
           <DeleteOutlineIcon className="userListDelete" onClick={() => handleClickOpen(params.row.id, 'delete')} />
-        </>
+        </div>
 
       )
     });
@@ -201,6 +201,7 @@ export default function UserList() {
             placeholder="Search users..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
+            className="searchInput"
             InputProps={{
               startAdornment: (
                 <InputAdornment position="start">
@@ -211,7 +212,7 @@ export default function UserList() {
             style={{ marginRight: '16px', width: '300px' }} // Adjust width and margin as needed
           />
           <Link to="/newUser">
-            <Button variant="contained" color="primary">
+            <Button className="createButton" variant="contained" color="primary">
               Create
             </Button>
           </Link>
