@@ -31,6 +31,7 @@ export default function UserList() {
 
   useEffect(() => {
     fetchUsers();  // eslint-disable-next-line
+    console.log("users", users);
   }, [dispatch]);
 
   const fetchUsers = async () => {
@@ -153,7 +154,7 @@ export default function UserList() {
       width: 150,
       renderCell: (params) => (
         <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
-          <Link to={"/user/" + params.row.id}>
+          <Link to={"/user/" + params.row.id} state={{ users: params.row }}>
             <Button variant="outlined" color="primary" className="userListEdit">
               Edit
             </Button>
