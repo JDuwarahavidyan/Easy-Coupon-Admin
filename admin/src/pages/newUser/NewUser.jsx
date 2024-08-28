@@ -97,8 +97,11 @@ export default function NewUser() {
     let errorMessages = [];
 
     for (const row of bulkUsers) {
+        // Combine faculty, batch, and indexno to create the userName
+        const userName = `${row['Faculty']}${row['Batch']}${row['RegNo']}`.toLowerCase();
+
         const newUser = {
-            userName: row['Username'],
+            userName, // Use the combined and lowercased userName
             fullName: row['Full Name'],
             email: row['Email'],
             role: row['Role'],
@@ -121,7 +124,8 @@ export default function NewUser() {
             : ["Bulk user creation process completed successfully!"]
     );
     setOpen(true);
-  };
+};
+
 
   return (
     <div className="newUser">

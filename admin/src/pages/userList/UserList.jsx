@@ -56,7 +56,7 @@ export default function UserList() {
     setLoading(true);
     await deleteUser(selectedUserId, dispatch);
     fetchUsers(); // Re-fetch users after deletion
-    setLoading(false);
+    // setLoading(false);
   };
 
   const handleEnable = async () => {

@@ -5,6 +5,8 @@
 /.pnp
 .pnp.js
 service_account.json
+.env
+/functions
 
 
 # testing

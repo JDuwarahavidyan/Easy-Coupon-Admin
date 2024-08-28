@@ -2,6 +2,16 @@ const router = require('express').Router();
 const admin = require('firebase-admin');
 const User = require('../models/User');
 const { sendEmail } = require('../mail');
+const crypto = require('crypto');
+
+
+
+const generateRandomPassword = (length = 8) => {
+    const charset = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    return Array.from(crypto.randomFillSync(new Uint8Array(length)))
+        .map((x) => charset[x % charset.length])
+        .join('');
+};
 
 // Register a new user
 router.post('/register', async (req, res) => {
@@ -18,7 +28,7 @@ router.post('/register', async (req, res) => {
             return res.status(400).json({ error: 'Username is already taken' });
         }
 
-        const password = '123456';
+        const password = generateRandomPassword();
 
         const userRecord = await admin.auth().createUser({
             email,
@@ -60,7 +70,7 @@ router.post('/register', async (req, res) => {
 </div>
 
 <div><b>Username</b>: ${userName}</div>
-<div><b>Password</b>: 123456</div>
+<div><b>Temporary Password</b>: ${password}</div>
 
 <div>
 <ul style="list-style-type: none; padding-left: 0;">

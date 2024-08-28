@@ -1,32 +1,29 @@
+/* eslint-disable no-undef */
+
 const functions = require("firebase-functions");
 const admin = require("firebase-admin");
 admin.initializeApp();
 
 const db = admin.firestore();
-// If these variables are not needed, remove them:
 
-
-// Or comment them out if you plan to use them later:
-// const onRequest = functions.https.onRequest;
-// const logger = functions.logger;
-
-
-// Reset canteenCount every 5 seconds
-exports.resetCanteenCount = functions.pubsub.schedule(
-    "every 5 seconds").onRun(async (context) => {
-  const usersSnapshot = await db.collection("users").get();
-  usersSnapshot.forEach(async (doc) => {
-    await doc.ref.update({
-      canteenCount: 0,
-      updatedAt: admin.firestore.FieldValue.serverTimestamp(),
-    });
+// Reset canteenCount every day at midnight (Sri Lanka time)
+exports.resetCanteenCountDaily = functions.pubsub.schedule(
+  "every day 00:00").timeZone('Asia/Colombo').onRun(async () => {
+const usersSnapshot = await db.collection("users").get();
+usersSnapshot.forEach(async (doc) => {
+  await doc.ref.update({
+    canteenCount: 0,
+    updatedAt: admin.firestore.FieldValue.serverTimestamp(),
   });
-  console.log("canteenCount reset to 0 for all users");
+});
+console.log("canteenCount reset to 0 for all users");
 });
 
-// Reset studentCount every 5 minutes
-exports.resetStudentCount = functions.pubsub.schedule(
-    "every 5 minutes").onRun(async (context) => {
+
+// Reset studentCount on the first day of every month at midnight (Sri Lanka time)
+exports.resetStudentCountMonthly = functions.pubsub.schedule(
+  "0 0 1 * *"
+).timeZone("Asia/Colombo").onRun(async () => {
   const usersSnapshot = await db.collection("users").get();
   usersSnapshot.forEach(async (doc) => {
     await doc.ref.update({
