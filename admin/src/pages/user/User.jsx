@@ -14,7 +14,7 @@ import Select from '@mui/material/Select';
 import MenuItem from '@mui/material/MenuItem';
 import Button from '@mui/material/Button';
 import CircularProgress from '@mui/material/CircularProgress';
-import { useState, useContext, useEffect } from 'react';
+import { useState, useContext, useEffect, useRef } from 'react';
 import { UserContext } from '../../context/userContext/UserContext';
 import { updateUser } from '../../context/userContext/apiCalls';
 import { useLocation, useNavigate } from 'react-router-dom';
@@ -25,6 +25,11 @@ import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
 import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
+import QRCode from 'react-qr-code';
+import { saveAs } from 'file-saver';
+import DownloadIcon from '@mui/icons-material/Download';
+import PrintIcon from '@mui/icons-material/Print';
+import CryptoJS from 'crypto-js';
 
 
 export default function User() {
@@ -41,14 +46,18 @@ export default function User() {
   const [isFormChanged, setIsFormChanged] = useState(false); 
   const [openDialog, setOpenDialog] = useState(false); // eslint-disable-next-line 
   const [dialogMessage, setDialogMessage] = useState('');
+  const [qrValue, setQrValue] = useState(null);
 
 
-  useEffect(() => {
-    console.log('location', location);
-  }, [location]);
+  // useEffect(() => {
+  //   console.log('location', location);
+  // }, [location]);
+
+  const qrCodeRef = useRef();
 
   const handleChange = (e) => {
     const { name, value } = e.target;
+    
     setFormValues((prev) => {
       const newValues = {
         ...prev,
@@ -119,7 +128,6 @@ export default function User() {
     }
   };
   
-
   const handleFileChange = (e) => {
     setImg(e.target.files[0]);
     setIsFormChanged(true); 
@@ -130,6 +138,99 @@ export default function User() {
     setDialogMessage(null);
   };
 
+  useEffect(() => {
+
+    const generateQrValue = () => {
+      const encryptionKey = CryptoJS.enc.Utf8.parse('easycouponkey@ruhunaengfac22TDDS'); 
+      const iv = CryptoJS.enc.Utf8.parse('easyduwarahan#27'); 
+
+
+      const encrypted = CryptoJS.AES.encrypt(user.id, encryptionKey, {
+        iv: iv,
+        mode: CryptoJS.mode.CBC,
+        padding: CryptoJS.pad.Pkcs7,
+      }).toString();
+
+      setQrValue(encrypted); 
+      setLoading(false);
+    };
+
+    generateQrValue();
+  }, [user]);
+
+
+  const downloadQrCode = () => {
+    const svg = qrCodeRef.current.querySelector('svg');
+    const serializer = new XMLSerializer();
+    const svgString = serializer.serializeToString(svg);
+  
+    // Create an Image object
+    const img = new Image();
+    const svgBlob = new Blob([svgString], { type: 'image/svg+xml;charset=utf-8' });
+    const url = URL.createObjectURL(svgBlob);
+  
+    img.onload = () => {
+      // Create a canvas element
+      const canvas = document.createElement('canvas');
+      canvas.width = img.width;
+      canvas.height = img.height;
+      
+      // Draw the image (from SVG) onto the canvas
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(img, 0, 0);
+  
+      // Convert the canvas to a PNG blob
+      canvas.toBlob((blob) => {
+        // Use FileSaver.js to save the blob as a PNG file
+        saveAs(blob, `${user.userName}_QRCode.png`);
+        // Revoke the object URL to free up memory
+        URL.revokeObjectURL(url);
+      }, 'image/png');
+    };
+  
+    // Set the image source to the SVG blob URL
+    img.src = url;
+  };
+  
+
+  const printQrCode = () => {
+    const svg = qrCodeRef.current.querySelector('svg');
+    const serializer = new XMLSerializer();
+    const svgString = serializer.serializeToString(svg);
+  
+    const printWindow = window.open('', '', 'width=800,height=600');
+    printWindow.document.write(`
+      <html>
+        <head>
+          <title>Print QR Code</title>
+          <style>
+            body {
+              display: flex;
+              justify-content: center;
+              align-items: center;
+              height: 100vh;
+              margin: 0;
+            }
+            svg {
+              width: 100%;
+              height: 100%;
+            }
+          </style>
+        </head>
+        <body>${svgString}</body>
+      </html>
+    `);
+  
+    printWindow.document.close();
+  
+    // Add an event listener to wait for the content to load before printing
+    printWindow.onload = () => {
+      printWindow.focus();
+      printWindow.print();
+      // printWindow.close();
+    };
+  };
+  
   return (
     <div className="user">
       <div className="userTitleContainer">
@@ -336,9 +437,23 @@ export default function User() {
       <div className="userShow">
       {(user.role === 'canteena' || user.role === 'canteenb') && (
               <div className="userShowInfo">
-                <Button className="createButton" variant="contained" color="primary">
-                  Generate QR Code
-              </Button>
+                {qrValue && (
+                <div ref={qrCodeRef} className="qrCodeContainer">
+                  <div>
+                    <QRCode className='qrCode' value={qrValue} size={250} />
+                  </div>
+                  <div className="qrCodeActions">
+                    <Button onClick={downloadQrCode}>
+                      <DownloadIcon />
+                      Download
+                    </Button>
+                    <Button onClick={printQrCode}>
+                      <PrintIcon />
+                      Print
+                    </Button>
+                  </div>
+                </div>
+              )}
               </div>
             )}
       </div>
