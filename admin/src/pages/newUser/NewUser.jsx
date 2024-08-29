@@ -15,8 +15,8 @@ import Button from '@mui/material/Button';
 import { createUser } from "../../context/userContext/apiCalls"; 
 import { UserContext } from "../../context/userContext/UserContext"; 
 import { useNavigate } from 'react-router-dom';
-import * as XLSX from 'xlsx'; // Import the xlsx library
-import DownloadIcon from '@mui/icons-material/Download'; // Import the download icon
+import * as XLSX from 'xlsx'; 
+import DownloadIcon from '@mui/icons-material/Download'; 
 
 export default function NewUser() {
   const [user, setUser] = useState({

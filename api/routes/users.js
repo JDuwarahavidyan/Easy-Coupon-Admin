@@ -8,12 +8,44 @@ const { sendEmail } = require('../mail');
 
 // UPDATE
 router.put("/:id", verifyAdmin, async (req, res) => {
+  const { email, userName, ...otherUpdates } = req.body;
+  const userId = req.params.id;
+  const db = admin.firestore();
+
   try {
-      const userRef = admin.firestore().collection('users').doc(req.params.id);
-      
+      // Check if the username is taken by another user
+      if (userName) {
+          const existingUser = await db.collection('users')
+              .where('userName', '==', userName)
+              .where(admin.firestore.FieldPath.documentId(), '!=', userId)
+              .limit(1)
+              .get();
+
+          if (!existingUser.empty) {
+              return res.status(400).json({ error: 'Username is already taken' });
+          }
+      }
+
+      // Check if the email is taken by another user
+      if (email) {
+          const existingEmailUser = await admin.auth().getUserByEmail(email).catch(() => null);
+
+          if (existingEmailUser && existingEmailUser.uid !== userId) {
+              return res.status(400).json({ error: 'Email is already taken' });
+          }
+      }
+
+      // Update Firebase Auth user
+      await admin.auth().updateUser(userId, {
+          email,
+          ...otherUpdates,
+      });
+
+      // Update Firestore user document
+      const userRef = db.collection('users').doc(userId);
       await userRef.update({
           ...req.body,
-          updatedAt: new Date().toISOString(),
+          updatedAt: admin.firestore.FieldValue.serverTimestamp(),
       });
 
       const updatedUser = await userRef.get();
@@ -22,6 +54,7 @@ router.put("/:id", verifyAdmin, async (req, res) => {
       res.status(500).json({ error: err.message });
   }
 });
+
 
 // DELETE
 router.delete("/:id", verifyAdmin, async (req, res) => {

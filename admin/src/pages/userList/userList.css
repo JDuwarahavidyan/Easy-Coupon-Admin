@@ -36,3 +36,8 @@
 .createButton{
   margin-right: 10px !important;
 }
+
+.userListEdit:hover {
+  background-color: #3f9ab5; /* Change background to primary color on hover */
+  color: white; /* Change text color to white on hover */
+}

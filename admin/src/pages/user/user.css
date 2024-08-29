@@ -4,11 +4,16 @@
 
 }
 
+.userTitle{
+    font-size: 24px;
+    font-weight: 600;
+}
+
 .userTitleContainer {
     display: flex;
     align-items: center;
     justify-content: space-between;
-  }
+}
   
   .userAddButton {
     width: 80px;
@@ -52,6 +57,7 @@
 .userShowTop {
     display: flex !important;
     align-items: center;
+    margin-top: 20px;
     
   }
   
@@ -98,7 +104,13 @@
 .userUpdateTitle{
     font-size: 24px;
     font-weight: 600;
-    margin-bottom: -100px !important;
+    margin-bottom: -80px !important;
+}
+
+.userCurrentTitle{
+    font-size: 24px;
+    font-weight: 600;
+    /* margin-bottom: -100px !important; */
 }
 
 .userUpdateForm{
@@ -110,11 +122,14 @@
 .userUpdateItem{
     display: flex;
     flex-direction: column;
-    margin-top: 10px;
+    margin-top: 20px;
     margin-left: 10px;
+
 }
 
-
+.newUserSelect{
+    height: 55px !important;
+}
 
 /* .userUpdateItem>label{
     margin-bottom: 5px;

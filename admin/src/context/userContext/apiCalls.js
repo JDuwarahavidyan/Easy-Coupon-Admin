@@ -66,7 +66,9 @@ export const updateUser = async (id, User, dispatch) => {
       });
       dispatch(updateUserSuccess(res.data));
     } catch (err) {
-      dispatch(updateUserFailure());
+      const errorMsg = err.response?.data?.error || "Something went wrong!";
+      dispatch(updateUserFailure(errorMsg));
+      throw new Error(errorMsg);
     }
 };
 

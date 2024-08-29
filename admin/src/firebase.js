@@ -1,15 +1,15 @@
 import { initializeApp } from "firebase/app";
 import { getStorage } from "firebase/storage";
 
-
 const firebaseConfig = {
-  apiKey: "AIzaSyDB17sQAAJlAiQ7dpfMmIGYu5_xCLYl5aA",
-  authDomain: "cinexa-d85e0.firebaseapp.com",
-  projectId: "cinexa-d85e0",
-  storageBucket: "cinexa-d85e0.appspot.com",
-  messagingSenderId: "656305385686",
-  appId: "1:656305385686:web:699ef3121052b32695d977",
-  measurementId: "G-HCJVKG4DNJ"
+  apiKey: "AIzaSyCSENmoReNdWayj0_AMTkAP16Zhbu7kGmk",
+  authDomain: "easy-coupon-5ce03.firebaseapp.com",
+  databaseURL: "https://easy-coupon-5ce03-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "easy-coupon-5ce03",
+  storageBucket: "easy-coupon-5ce03.appspot.com",
+  messagingSenderId: "1096357836745",
+  appId: "1:1096357836745:web:699440bc8b629cfb099a18",
+  measurementId: "G-ES11ZLY1F6"
 };
 
 // Initialize Firebase

@@ -96,7 +96,7 @@ export default function UserList() {
         width: 200,
         renderCell: (params) => (
           <div className="userListUser">
-            <Avatar className="userListImg" src={params.row.avatar || "https://www.pngkey.com/png/full/114-1149878_setting-user-avatar-in-specific-size-without-breaking.png"} alt="" />
+            <Avatar className="userListImg" src={params.row.profilePic} alt="" />
             {params.row.userName}
           </div>
         )
@@ -155,7 +155,7 @@ export default function UserList() {
       renderCell: (params) => (
         <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
           <Link to={"/user/" + params.row.id} state={{ users: params.row }}>
-            <Button variant="outlined" color="primary" className="userListEdit">
+            <Button variant="outlined" color="primary" className="">
               Edit
             </Button>
           </Link>

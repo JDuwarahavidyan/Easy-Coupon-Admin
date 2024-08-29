@@ -13,7 +13,7 @@ import { updateMovie } from "../../context/movieContext/apiCalls";
 import { MovieContext } from "../../context/movieContext/MovieContext";
 import { useNavigate } from 'react-router-dom';
 import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
-import  storage  from '../../firebase';
+import  storage  from '.././../firebase';
 import LinearProgress from '@mui/material/LinearProgress';
 
 export default function Movie() {
