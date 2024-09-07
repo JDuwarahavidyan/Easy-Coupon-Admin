@@ -37,7 +37,7 @@ export default function Sidebar() {
                 Users
               </li>
             </Link>
-            <Link to="/movies" className='link'>
+            <Link to="/qrcode" className='link'>
               <li className="sidebarListItem">
                 <AssessmentOutlinedIcon className="sidebarIcon" />
                 Reports

@@ -9,10 +9,7 @@ import NewUser from "./pages/newUser/NewUser";
 import Login from "./pages/login/Login";
 import { useContext } from "react";
 import { AuthContext } from "./context/authContext/AuthContext";
-
-import MovieList from "./pages/movieList/MovieList";
-import Movie from "./pages/movie/movie";
-import NewMovie from "./pages/newMovie/NewMovie";
+import QrCodeList from "./pages/qrcodeList/QrCodeList";
 
 function App() {
   const { user } = useContext(AuthContext);
@@ -37,9 +34,8 @@ function App() {
                     <Route path="/user/:userID" element={<User />} />
                     <Route path="/newUser" element={<NewUser />} />
 
-                    <Route path="/movies" element={<MovieList />} />
-                    <Route path="/movie/:productID" element={<Movie />} />
-                    <Route path="/newMovie" element={<NewMovie />} />
+                    <Route path="/qrcode" element={<QrCodeList />} />
+                    
                   </Routes>
                 </div>
               </>
