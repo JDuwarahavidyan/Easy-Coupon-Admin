@@ -6,7 +6,7 @@ import './index.css';
 import './app.css';
 import reportWebVitals from './reportWebVitals';
 import { AuthContextProvider } from './context/authContext/AuthContext';
-import { MovieContextProvider } from './context/movieContext/MovieContext';
+import { QrCodeContextProvider } from './context/qrCodeContext/QrCodeContext';
 import { ListContextProvider } from './context/listContext/ListContext';
 import { UserContextProvider } from './context/userContext/UserContext';
 
@@ -16,13 +16,13 @@ const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <React.StrictMode>
     <AuthContextProvider>
-      <MovieContextProvider>
+      <QrCodeContextProvider>
         <ListContextProvider>
           <UserContextProvider>
             <App />
           </UserContextProvider>
         </ListContextProvider>
-      </MovieContextProvider>
+      </QrCodeContextProvider>
     </AuthContextProvider>
   </React.StrictMode>
 );

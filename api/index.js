@@ -3,9 +3,10 @@ const app = express();
 const dotenv = require('dotenv');
 const authRoute = require('./routes/auth');
 const userRoute = require('./routes/users');
-const movieRoute = require('./routes/movies');
+const qrRoute = require('./routes/qr');
+const http = require('http');
+const WebSocket = require('ws');
 const admin = require('firebase-admin');
-const functions = require('firebase-functions');
 
 dotenv.config();
 
@@ -16,19 +17,36 @@ admin.initializeApp({
 
 const db = admin.firestore(); // Initializing Firestore
 
+const server = http.createServer(app); // Create a server instance
+const wss = new WebSocket.Server({ server }); // Create a WebSocket server
+
 app.use((req, res, next) => {
-  req.db = db; // Making Firestore available in req
+  req.db = db; // Make Firestore available in req
   next();
 });
-
 
 app.use(express.json());
 
 app.use('/api/auth', authRoute);
 app.use('/api/users', userRoute);
-app.use('/api/movies', movieRoute);
+app.use('/api/qr', qrRoute);
 
+// WebSocket connection for real-time updates
+wss.on('connection', (ws) => {
+  // console.log('Client connected');
 
-app.listen(8800, () => {
+  const qrcodeRef = db.collection('qrcodes').orderBy('scannedAt', 'desc');
+
+  qrcodeRef.onSnapshot(snapshot => {
+    const qrcodes = snapshot.docs.map(doc => doc.data());
+    ws.send(JSON.stringify(qrcodes)); // Send real-time data to the connected client
+  });
+
+  ws.on('close', () => {
+    // console.log('Client disconnected');
+  });
+});
+
+server.listen(8800, () => {
   console.log('Backend Server is running!');
 });

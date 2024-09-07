@@ -83,7 +83,7 @@ router.get("/find/:id", verifyAdmin, async (req, res) => {
   }
 });
 
-// GET ALL USERS - ADMIN ONLY
+// GET ALL USERS 
 router.get("/", verifyAdmin, async (req, res) => {
   try {
       const query = req.query.new;
