@@ -1,6 +1,6 @@
 .userList {
     flex: 6;
-    height: 83.5vh;
+    height: 82vh;
     position: relative;
   }
   
@@ -43,17 +43,46 @@
   color: white; /* Change text color to white on hover */
 }
 
-.calender{
-  position: absolute !important;
-  z-index: 10 !important;
-  top: 50px;
-  right: 0;
-  background-color: lightblue;
+.header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 5px;
 }
 
-.loadingContainer {
+.totalCouponsUsed {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  margin-right: 20px;
+}
+
+.dateRangePicker {
+  display: flex;
+  align-items: center;
+  color: white;
+  margin-right: 20px;
+  
+}
+
+.searchBox {
+  display: flex;
+  align-items:end;
+  margin-right: 10px;
+}
+
+.loadingBox {
   display: flex;
   justify-content: center;
   align-items: center;
   height: 100%;
+}
+
+.container{
+  display: flex;
+  flex-direction: row;
+  margin-right: 10px;
+}
+
+.footer{
+  z-index: 99;
 }

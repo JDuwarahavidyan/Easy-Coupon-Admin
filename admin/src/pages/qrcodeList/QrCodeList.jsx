@@ -1,6 +1,6 @@
 import "./qrCodeList.css";
 import { DataGrid } from '@mui/x-data-grid';
-import { useState, useContext, useEffect } from "react";
+import { useState, useContext, useEffect, useCallback } from "react";
 import { QrCodeContext } from '../../context/qrCodeContext/QrCodeContext';
 import { getQrcodes } from "../../context/qrCodeContext/apiCalls";
 import Tabs from '@mui/material/Tabs';
@@ -13,16 +13,22 @@ import InputAdornment from '@mui/material/InputAdornment';
 import { DateRangePicker } from 'rsuite';
 import 'rsuite/dist/rsuite.min.css';
 
-
 export default function QrCodeList() {
   const { qrcodes, dispatch } = useContext(QrCodeContext);
   const [roleFilter, setRoleFilter] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(true);
+  const [selectedDateRange, setSelectedDateRange] = useState([null, null]);
+
+  const fetchQrCodes = useCallback(async () => {
+    setLoading(true);
+    await getQrcodes(dispatch);
+    setLoading(false);
+  }, [dispatch]);
 
   useEffect(() => {
-    fetchQrCodes(); // Fetch initial data
-    const ws = new WebSocket('ws://localhost:8800'); // Replace with your backend WebSocket URL
+    fetchQrCodes();  
+    const ws = new WebSocket('ws://localhost:8800');
 
     ws.onopen = () => {
       console.log('Connected to WebSocket');
@@ -40,13 +46,7 @@ export default function QrCodeList() {
     return () => {
       ws.close();
     };
-  }, [dispatch]);
-
-  const fetchQrCodes = async () => {
-    setLoading(true);
-    await getQrcodes(dispatch);
-    setLoading(false);
-  };
+  }, [dispatch, fetchQrCodes]);
 
   const handleTabChange = (event, newValue) => {
     setRoleFilter(newValue);
@@ -95,34 +95,52 @@ export default function QrCodeList() {
 
   const columns = getColumns();
 
-  const filteredQrCodes = qrcodes.filter(qrcodes => {
+  const filteredQrCodes = qrcodes.filter(qrcode => {
     const matchesRole = roleFilter === 'all'
       ? true
       : roleFilter === 'canteena'
-        ? qrcodes.canteenType === 'canteena'
-        : qrcodes.canteenType === roleFilter;
+        ? qrcode.canteenType === 'canteena'
+        : qrcode.canteenType === roleFilter;
 
     const matchesSearch =
-      (String(qrcodes.studentName).toLowerCase().includes(searchQuery.toLowerCase())) ||
-      (qrcodes.id.toLowerCase() || "").includes(searchQuery.toLowerCase()) ||
-      (qrcodes.canteenName.toLowerCase() || "").includes(searchQuery.toLowerCase());
+      (String(qrcode.studentName).toLowerCase().includes(searchQuery.toLowerCase())) ||
+      (qrcode.id.toLowerCase() || "").includes(searchQuery.toLowerCase()) ||
+      (qrcode.canteenName.toLowerCase() || "").includes(searchQuery.toLowerCase());
 
-    return matchesRole && matchesSearch;
+    const matchesDateRange = selectedDateRange[0] && selectedDateRange[1]
+      ? new Date(qrcode.scannedAt) >= new Date(selectedDateRange[0]) &&
+        new Date(qrcode.scannedAt) <= new Date(selectedDateRange[1])
+      : true;
+
+    return matchesRole && matchesSearch && matchesDateRange;
   });
+
+  const totalCouponsUsed = filteredQrCodes.reduce((sum, qrcode) => sum + (qrcode.count || 0), 0);
 
   return (
     <div className="userList">
-      <Box display="flex" justifyContent="space-between" mb={2}>
+      <Box className="header">
         <Tabs value={roleFilter} onChange={handleTabChange} aria-label="user role filter">
           <Tab label="All" value="all" />
           <Tab label="Canteen A (Kalderama)" value="canteena" />
           <Tab label="Canteen B (Hilton)" value="canteenb" />
         </Tabs>
-        <Box display="flex" alignItems="center" marginRight={0}>
-        <DateRangePicker />
+        
+        <Box className="container">
+        <Box className="totalCouponsUsed">
+          <strong>Total Coupons Used: {totalCouponsUsed}</strong>
         </Box>
-        <Box display="flex" alignItems="center">
-         
+        <Box className="dateRangePicker">
+          <DateRangePicker
+            value={selectedDateRange}
+            onChange={(range) => setSelectedDateRange(range)}
+            placeholder="Select the Date Range"
+            placement="autoVertical"
+            format="yyyy-MM-dd"
+            onClean={() => setSelectedDateRange([null, null])} // Reset the date range
+          />
+        </Box>
+        <Box className="searchBox">
           <TextField
             variant="outlined"
             placeholder="Search users..."
@@ -130,34 +148,35 @@ export default function QrCodeList() {
             onChange={(e) => setSearchQuery(e.target.value)}
             className="searchInput"
             InputProps={{
-              inputProps: {
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <SearchIcon />
-                  </InputAdornment>
-                ),
-              },
+              startAdornment: (
+                <InputAdornment position="start">
+                  <SearchIcon />
+                </InputAdornment>
+              ),
             }}
-            style={{ marginRight: '16px', width: '300px' }} // Adjust width and margin as needed
           />
+
+        </Box>
         </Box>
       </Box>
 
       {loading ? (
-        <Box display="flex" justifyContent="center" alignItems="center" height="100%">
+        <Box className="loadingBox">
           <CircularProgress />
         </Box>
       ) : (
-        <DataGrid
-          rows={filteredQrCodes}
-          disableSelectionOnClick
-          columns={columns}
-          pageSize={10} // Limit to 10 records per page
-          pageSizeOptions={[10, 25, 50, 100]} // Additional page size options
-          pagination // Enable pagination
-          checkboxSelection
-          getRowId={(r) => r.id}
-        />
+        <>
+          <DataGrid
+            rows={filteredQrCodes}
+            disableSelectionOnClick
+            columns={columns}
+            pageSize={10} // Limit to 10 records per page
+            pageSizeOptions={[10, 25, 50, 100]} // Additional page size options
+            pagination // Enable pagination
+            checkboxSelection
+            getRowId={(r) => r.id}
+          />
+        </>
       )}
     </div>
   );

@@ -39,7 +39,7 @@ const QrcodeReducer = (state, action) => {
       
       case "DELETE_QRCODE_FAILURE":
       return {
-        ... state, 
+        ...state, 
         isFetching: false,
         error: true,
       };
