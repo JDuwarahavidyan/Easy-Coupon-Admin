@@ -2,7 +2,7 @@ import "./userList.css";
 import { DataGrid } from '@mui/x-data-grid';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 import { Link } from "react-router-dom";
-import { useState, useContext, useEffect } from "react";
+import { useState, useContext, useEffect, useCallback } from "react";
 import Avatar from '@mui/material/Avatar';
 import { UserContext } from '../../context/userContext/UserContext';
 import { deleteUser, getUsers, enableUser, disableUser } from "../../context/userContext/apiCalls";
@@ -29,16 +29,15 @@ export default function UserList() {
   const [loading, setLoading] = useState(true);
   const [dialogType, setDialogType] = useState(null); // State to track the type of dialog (delete, enable, disable)
 
-  useEffect(() => {
-    fetchUsers();  // eslint-disable-next-line
-    console.log("users", users);
-  }, [dispatch]);
-
-  const fetchUsers = async () => {
+  const fetchUsers = useCallback(async () => {
     setLoading(true);
     await getUsers(dispatch);
     setLoading(false);
-  };
+  }, [dispatch]);
+
+  useEffect(() => {
+    fetchUsers();
+  }, [fetchUsers]);
 
   const handleClickOpen = (id, type) => {
     setSelectedUserId(id);
@@ -57,7 +56,6 @@ export default function UserList() {
     setLoading(true);
     await deleteUser(selectedUserId, dispatch);
     fetchUsers(); // Re-fetch users after deletion
-    // setLoading(false);
   };
 
   const handleEnable = async () => {
@@ -113,25 +111,20 @@ export default function UserList() {
         field: "status",
         headerName: "Status",
         width: 150,
-
         renderCell: (params) => (
           <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
             {params.row.disabled ? (
-
               <Button
                 variant="contained"
                 color="secondary"
-
                 onClick={() => handleClickOpen(params.row.id, 'enable')}
               >
                 Enable
               </Button>
             ) : (
-
               <Button
                 variant="contained"
                 color="primary"
-
                 onClick={() => handleClickOpen(params.row.id, 'disable')}
               >
                 Disable
@@ -162,7 +155,6 @@ export default function UserList() {
 
           <DeleteOutlineIcon className="userListDelete" onClick={() => handleClickOpen(params.row.id, 'delete')} />
         </div>
-
       )
     });
 
@@ -261,9 +253,14 @@ export default function UserList() {
             Cancel
           </Button>
           <Button
-            onClick={dialogType === 'delete' ? handleDelete : dialogType === 'enable' ? handleEnable : handleDisable}
+            onClick={
+              dialogType === 'delete'
+                ? handleDelete
+                : dialogType === 'enable'
+                ? handleEnable
+                : handleDisable
+            }
             color="primary"
-            className="buttonStatus"
             autoFocus
           >
             {dialogType === 'delete' ? "Delete" : dialogType === 'enable' ? "Enable" : "Disable"}
